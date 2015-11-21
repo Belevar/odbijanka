@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Paddle : MonoBehaviour
 {
@@ -42,10 +41,7 @@ public class Paddle : MonoBehaviour
 	void moveWithMouse ()
 	{
 		Vector3 paddlePos = new Vector3 (0.5f, this.transform.position.y, 0f);
-		
 		float mousePositionInBlocks = Input.mousePosition.x / Screen.width * 16;
-		
-		
 		paddlePos.x = Mathf.Clamp (mousePositionInBlocks, originalSize.x, 16f - originalSize.x);
 		this.transform.position = paddlePos;
 	}
@@ -53,10 +49,7 @@ public class Paddle : MonoBehaviour
 	void useAutoPlay ()
 	{
 		Vector3 paddlePos = new Vector3 (0.5f, this.transform.position.y, 0f);
-		
 		Vector3 ballPos = ball.transform.position;
-		
-		
 		paddlePos.x = Mathf.Clamp (ballPos.x, 0.5f, 15.5f);
 		this.transform.position = paddlePos;
 	}
@@ -64,14 +57,9 @@ public class Paddle : MonoBehaviour
 	void OnCollisionEnter2D (Collision2D collision)
 	{
 		foreach (ContactPoint2D placeOnPaddle in collision.contacts) {
-			if (this.GetComponent<Collider2D> ().transform.position.x < placeOnPaddle.point.x) {
-				print ("KRUL");
-				ball.bounceFromThePaddle (1);
-			} else {
-				ball.bounceFromThePaddle (-1);
-				print ("LEWAK");
-			}
-//			ball.bounceFromThePaddle (this.GetComponent<Collider2D> ().transform.position.x < placeOnPaddle.point.x);
+			//Dostosować do różnych wielkości deski 
+			float bounceAngle = (this.GetComponent<Collider2D> ().transform.position.x - placeOnPaddle.point.x) * 1.7f;
+			ball.bounceFromThePaddle (-bounceAngle);
 		}
 	}
 
@@ -91,6 +79,11 @@ public class Paddle : MonoBehaviour
 		gameObject.transform.localScale = originalSize;
 		disactivateShooting ();
 		wasReduced = wasEnlarged = false;
+	}
+
+	public Vector3 getPosition ()
+	{
+		return originalPosition;
 	}
 
 	public void resizePaddle (float scale)
@@ -118,6 +111,5 @@ public class Paddle : MonoBehaviour
 		Rigidbody2D clone = Instantiate (missle, test, transform.rotation) as Rigidbody2D;
 		Rigidbody2D clone1 = Instantiate (missle, test2, transform.rotation) as Rigidbody2D;
 		clone1.velocity = clone.velocity = transform.TransformDirection (Vector2.down * 5);
-		print ("SZCZELAM! SZCZELAM! SZCZELAM!");
 	}
 }

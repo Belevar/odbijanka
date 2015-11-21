@@ -1,19 +1,35 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System;
 
 public class LevelManager : MonoBehaviour
 {
 	private int lives;
 
+	//temp variables
+	bool wasGiven;
+
+	[Serializable]
+	public struct Bonuses
+	{
+		public int quantity;
+		public Rigidbody2D bonusType;
+	}
+	public Bonuses[] bonuses;
+
 	void Start ()
 	{
+		wasGiven = false;
 		lives = 3;
 	}
 
 	public bool loseLiveAndCheckEndGame ()
 	{
-		print (lives);
-		return (--lives) <= 0;
+		bool endGame = --lives <= 0;
+		print (endGame);
+		if (endGame) {
+			loadScene ("LoseScreen");
+		}
+		return endGame;
 	}
 
 	public void addLive ()
@@ -23,6 +39,7 @@ public class LevelManager : MonoBehaviour
 
 	public void loadNextLevel ()
 	{
+		Ball.resetBallCounter ();
 		Application.LoadLevel (Application.loadedLevel + 1);
 	}
 
@@ -33,6 +50,8 @@ public class LevelManager : MonoBehaviour
     
 	public void loadScene (string name)
 	{
+		Ball.resetBallCounter ();
+		Brick.bricksCounter = 0;
 		Application.LoadLevel (name);
 	}
 
@@ -41,5 +60,18 @@ public class LevelManager : MonoBehaviour
 		if (Brick.bricksCounter <= 0) {
 			loadNextLevel ();
 		}
+	}
+
+	public Rigidbody2D getBonus ()
+	{
+		if (bonuses.Length != 0) {
+			if (!wasGiven) {
+				wasGiven = true;
+				return bonuses [0].bonusType;
+			} else {
+				return bonuses [1].bonusType;
+			}
+		}
+		return null;
 	}
 }

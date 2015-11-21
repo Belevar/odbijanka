@@ -55,17 +55,15 @@ public class Brick : MonoBehaviour
 		AudioSource.PlayClipAtPoint (destroySound, transform.position);
 		
 		if (collision.gameObject.tag == "ball") {
-            if(Ball.superBall())
-            {
-                handleSuperBallAttack();
-            }
-            else if (isBreakable) {
-			    handleHits ();
+			if (Ball.superBall ()) {
+				handleSuperBallAttack ();
+			} else if (isBreakable) {
+				handleHits ();
 		    
-            }
-       } else {
-            handleHits();
-       }
+			}
+		} else {
+			handleHits ();
+		}
             
             
 	}
@@ -82,13 +80,17 @@ public class Brick : MonoBehaviour
 		foreach (var brick in invisible) {
 			brick.GetComponent<Brick> ().setBreakable (false);
 		}
-    }   
+	}   
 
-    void handleSuperBallAttack()
-    {
-        Debug.LogError("Pewnie ta funkcja bedzie do usuniecia - trzeba wylaczyc kolizje");
-    }
+	void handleSuperBallAttack ()
+	{
+		Debug.LogError ("Pewnie ta funkcja bedzie do usuniecia - trzeba wylaczyc kolizje");
+	}
 
+	void OnTriggerEnter2D (Collider2D trigger)
+	{
+		print ("Działa!"); // a jednak Nie : <
+	}
 
 	void handleHits ()
 	{
@@ -97,24 +99,28 @@ public class Brick : MonoBehaviour
 			setVisible ();
 		}
 		if (timesHit >= maxHits) {
-		    destroyBrick();
-        } else {
+			destroyBrick ();
+		} else {
 			loadSprites ();
 		}
 	}
 
-    void destroyBrick()
-    {
-			bricksCounter--;
-			Destroy (gameObject);
-			checkForBonus ();
-			levelManager.brickDestroyed ();
-    }
+	void destroyBrick ()
+	{
+		bricksCounter--;
+		print (bricksCounter);
+		Destroy (gameObject);
+		checkForBonus ();
+		levelManager.brickDestroyed ();
+	}
 
 	void checkForBonus ()
 	{
-		Rigidbody2D clone = Instantiate (bonus, transform.position, transform.rotation) as Rigidbody2D;
-		clone.velocity = transform.TransformDirection (Vector2.down * 5);
+		bonus = levelManager.getBonus ();
+		if (bonus != null) {
+			Rigidbody2D clone = Instantiate (bonus, transform.position, transform.rotation) as Rigidbody2D;
+			clone.velocity = transform.TransformDirection (Vector2.down * 5);
+		}
 	}
 
 	void setBreakable (bool breakable)

@@ -4,8 +4,6 @@ using System.Collections;
 public class LoseCollider : MonoBehaviour
 {
 	private LevelManager levelManager;
-	private Paddle paddle;
-	private Ball ball;
 
 	void Start ()
 	{
@@ -18,15 +16,13 @@ public class LoseCollider : MonoBehaviour
 			if (Ball.getBallCounter () > 1) {
 				print ("Wiekszy");
 				trigger.gameObject.GetComponent<Ball> ().destroyBall ();
-			}
-			if (levelManager.loseLiveAndCheckEndGame ()) {
-				levelManager.loadScene ("LoseScreen");
-				Brick.bricksCounter = 0;
 			} else {
-				GameObject.FindObjectOfType<Paddle> ().resetPaddle ();
-				GameObject.FindObjectOfType<Ball> ().resetBall ();
-				Destroy (trigger.gameObject);
+				if (!levelManager.loseLiveAndCheckEndGame ()) {
+					GameObject.FindObjectOfType<Paddle> ().resetPaddle ();
+					GameObject.FindObjectOfType<Ball> ().resetBall ();
+				}
 			}
 		}
+//		Destroy (trigger.gameObject);
 	}
 }

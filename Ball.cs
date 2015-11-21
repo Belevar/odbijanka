@@ -18,13 +18,17 @@ public class Ball : MonoBehaviour
 		NORMAL,
 		SUPER}
 	;
+	public Sprite[] sprites;
 
 	// Use this for initialization
 	void Start ()
 	{
+		if (ballCounter == 0) {
+			originalPosition = gameObject.transform.position;
+		}
 		ballCounter += 1;
+		print ("Start " + ballCounter);
 		paddle = GameObject.FindObjectOfType<Paddle> ();
-		originalPosition = gameObject.transform.position;
 		paddleToBallVector = this.transform.position - paddle.transform.position;
 	}
 	
@@ -51,6 +55,7 @@ public class Ball : MonoBehaviour
 
 	public void stickToThePaddle ()
 	{
+		hasStarted = false;
 		isGlued = true;
 		paddleToBallVector = this.transform.position - paddle.transform.position;
 		Vector3 v = this.GetComponent<Rigidbody2D> ().velocity;
@@ -75,6 +80,7 @@ public class Ball : MonoBehaviour
 	public void resetBall ()
 	{
 		gameObject.transform.position = originalPosition;
+		changeBallMode (BALL_MODE.NORMAL);
 		stickToThePaddle ();
 	}
 
@@ -98,22 +104,31 @@ public class Ball : MonoBehaviour
 		return ballCounter;
 	}
 
-	static public void changeBallMode (BALL_MODE mode)
+	static public void resetBallCounter ()
+	{
+		ballCounter = 0;
+	}
+
+
+	public void changeBallMode (BALL_MODE mode)
 	{
 		if (mode == BALL_MODE.SUPER) {
+//			Physics2D.IgnoreLayerCollision (gameObject.layer, 10, true);
 			isSuperBall = true;
 			setDamage ();
-			//load sprite
+			this.GetComponent<SpriteRenderer> ().sprite = sprites [1];
 		} else if (mode == BALL_MODE.NORMAL) {
+			Physics2D.IgnoreLayerCollision (gameObject.layer, 10, false);
 			isSuperBall = false;
 			setDamage ();
-			//load sprite
+			this.GetComponent<SpriteRenderer> ().sprite = sprites [0];
 		}
 	}
 
 	public int destroyBall ()
 	{
 		ballCounter--;
+		print ("destroy " + ballCounter);
 		Destroy (gameObject);
 		return ballCounter;
 	}
@@ -124,7 +139,7 @@ public class Ball : MonoBehaviour
 //        transform.Translate(Vector2.up * 2.0f * Time.deltaTime);
 //		transform.gameObject.vel
 		print ("SpeedUP");
-		this.GetComponent<Rigidbody2D> ().velocity *= 2;
+//		this.GetComponent<Rigidbody2D> ().velocity += 2.0f;
 	}
 
 	public void slowDown ()
@@ -132,14 +147,13 @@ public class Ball : MonoBehaviour
 //        transform.Translate(Vector2.right * 0.5f * Time.deltaTime);
 //        transform.Translate(Vector2.up * 0.5f * Time.deltaTime);
 		print ("lowDown");
-		this.GetComponent<Rigidbody2D> ().velocity *= 2;
+//		this.GetComponent<Rigidbody2D> ().velocity -= 2.0f;
 	}
 
 	public void duplicateBall ()
 	{
 		Vector2 test = originalSpeed;
-		test.x *= -1;
-		this.GetComponent<Rigidbody2D> ().velocity = test;
+		test.x *= -1.0f;
 		Rigidbody2D clone = Instantiate (this.GetComponent<Rigidbody2D> (), transform.position, transform.rotation) as Rigidbody2D;
 		clone.velocity = test;
 		if (clone == null) {
