@@ -1,8 +1,15 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
+public class Boundary
+{
+	public float xMin, xMax, zMin, zMax;
+}
+
+
 public class Paddle : MonoBehaviour
 {
-
+	public SimpleTouchPad touchPad;
 	public bool autoPlay = false;
 	public Rigidbody2D missle;
 	private Ball ball;
@@ -11,17 +18,26 @@ public class Paddle : MonoBehaviour
 	Vector3 originalSize;
 	bool wasReduced = false;
 	bool wasEnlarged = false;
+	public float speed;
+	public Boundary boundary;
+	private Rigidbody2D rigidbody;
+	int oldMouseX;
 
 
 	// Use this for initialization
 	void Start ()
 	{
+		oldMouseX = 0;
 		canShoot = false;
 		ball = GameObject.FindObjectOfType<Ball> ();
 		originalPosition = gameObject.transform.position;
 		originalSize = gameObject.transform.localScale;
+		rigidbody = gameObject.GetComponent<Rigidbody2D> ();
+		if (rigidbody == null) {
+			Debug.LogError ("NAAAAAAAAAAAAAAAAa");
+		}
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -35,15 +51,27 @@ public class Paddle : MonoBehaviour
 
 		} else {
 			useAutoPlay ();
+			Debug.LogError ("AUTO PLAY");
 		}
 	}
 
+	//if palec != paddlePos +- halfSize
 	void moveWithMouse ()
 	{
-		Vector3 paddlePos = new Vector3 (0.5f, this.transform.position.y, 0f);
 		float mousePositionInBlocks = Input.mousePosition.x / Screen.width * 16;
-		paddlePos.x = Mathf.Clamp (mousePositionInBlocks, originalSize.x, 16f - originalSize.x);
-		this.transform.position = paddlePos;
+		int deska = (int)this.transform.position.x;
+		int mysz = (int)mousePositionInBlocks;
+		if (mysz != deska) {
+			Vector3 paddlePos;
+			Vector2 velocity = Vector2.right * speed;
+			if (deska < mysz) {
+				paddlePos = this.GetComponent<Rigidbody2D> ().position + velocity * Time.deltaTime;
+			} else {
+				paddlePos = this.GetComponent<Rigidbody2D> ().position + velocity * Time.deltaTime * (-1);
+			}
+			paddlePos.x = Mathf.Clamp (paddlePos.x, 0.5f, 15.5f);
+			this.transform.position = paddlePos;
+		}
 	}
 
 	void useAutoPlay ()

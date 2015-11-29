@@ -80,7 +80,7 @@ public class Ball : MonoBehaviour
 	public void resetBall ()
 	{
 		gameObject.transform.position = originalPosition;
-		changeBallMode (BALL_MODE.NORMAL);
+//		changeBallMode (BALL_MODE.NORMAL);
 		stickToThePaddle ();
 	}
 
