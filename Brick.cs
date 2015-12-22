@@ -18,19 +18,20 @@ public class Brick : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		levelManager = this.FindObjectOfType<LevelManager> ();
 		isInvisible = this.tag == "invisible";
 		setBreakable (this.tag == "breakable" || isInvisible);
 		if (isBreakable || isInvisible) {
+			print (bricksCounter);
 			bricksCounter++;
+			levelManager.updateBallCounter ();
 		}
 		maxHits = sprites.Length + 1;
 		if (isInvisible) {
 			gameObject.GetComponent<SpriteRenderer> ().enabled = false;
 			maxHits = 2;
 		}
-
 		timesHit = 0;
-		levelManager = GameObject.FindObjectOfType<LevelManager> ();
 	}
 	
 	// Update is called once per frame

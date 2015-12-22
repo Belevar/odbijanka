@@ -22,7 +22,8 @@ public class LoseCollider : MonoBehaviour
 					GameObject.FindObjectOfType<Ball> ().resetBall ();
 				}
 			}
+		} else {
+			Destroy (trigger.gameObject);
 		}
-//		Destroy (trigger.gameObject);
 	}
 }

@@ -4,6 +4,7 @@ using System.Collections;
 public class Ball : MonoBehaviour
 {
 
+
 	private Paddle paddle;
 	private Vector3 paddleToBallVector;
 	static private bool hasStarted = false;
@@ -11,8 +12,10 @@ public class Ball : MonoBehaviour
 	static private bool isGlued = true;
 	static private bool isSuperBall = false;
 	static private int damage = 1;
+	static public float maxSpeed;
+	static public float minSpeed;
 	private Vector3 originalPosition = new Vector3 ();
-	private Vector2 originalSpeed = new Vector2 (2f, 10f);
+	public Vector2 originalSpeed = new Vector2 (2f, 10f);
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -26,6 +29,8 @@ public class Ball : MonoBehaviour
 		if (ballCounter == 0) {
 			originalPosition = gameObject.transform.position;
 		}
+		isGlued = true;
+		hasStarted = false;
 		ballCounter += 1;
 		print ("Start " + ballCounter);
 		paddle = GameObject.FindObjectOfType<Paddle> ();
@@ -36,8 +41,11 @@ public class Ball : MonoBehaviour
 	void Update ()
 	{
 		if (!hasStarted || isGlued) {
+			float mousePositionInBlocks = Input.mousePosition.y / Screen.height * 16;
+			int delta = (int)Mathf.Abs (mousePositionInBlocks - paddle.transform.position.y);
 			this.transform.position = paddle.transform.position + paddleToBallVector;
-			if (Input.GetMouseButtonDown (0)) {
+			if (Input.GetMouseButtonDown (0) && delta <= 1) {
+				Debug.LogError ("Wystrzeliło");
 				this.GetComponent<Rigidbody2D> ().velocity = originalSpeed; 
 				hasStarted = true;
 				isGlued = false;
@@ -66,14 +74,14 @@ public class Ball : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		if (collision.collider.tag == "paddle") {
+		if (collision.collider.tag == "paddle" && isGlued) {
 			print ("Glue to pancakes!");
-//			stickToThePaddle ();
+			stickToThePaddle ();
 		}
 		if (hasStarted) {
-			Vector2 tweak = new Vector2 (Random.Range (0f, 0.2f), Random.Range (0f, 0.2f));
+////			Vector2 tweak = new Vector2 (Random.Range (0f, 0.2f), Random.Range (0f, 0.2f));
 			GetComponent<AudioSource> ().Play ();
-			this.GetComponent<Rigidbody2D> ().velocity += tweak;
+//			this.GetComponent<Rigidbody2D> ().velocity += tweak;
 		}
 	}
 
@@ -113,7 +121,6 @@ public class Ball : MonoBehaviour
 	public void changeBallMode (BALL_MODE mode)
 	{
 		if (mode == BALL_MODE.SUPER) {
-//			Physics2D.IgnoreLayerCollision (gameObject.layer, 10, true);
 			isSuperBall = true;
 			setDamage ();
 			this.GetComponent<SpriteRenderer> ().sprite = sprites [1];
@@ -135,19 +142,20 @@ public class Ball : MonoBehaviour
 
 	public void speedUp ()
 	{
-//        transform.Translate(Vector2.right * 2.0f * Time.deltaTime);
-//        transform.Translate(Vector2.up * 2.0f * Time.deltaTime);
-//		transform.gameObject.vel
-		print ("SpeedUP");
-//		this.GetComponent<Rigidbody2D> ().velocity += 2.0f;
+		if (originalSpeed.y < maxSpeed) {
+			Debug.Log ("Speed UP");
+			originalSpeed.y += 10;
+			gameObject.GetComponent<Rigidbody2D> ().velocity = originalSpeed;
+		}
 	}
 
 	public void slowDown ()
 	{
-//        transform.Translate(Vector2.right * 0.5f * Time.deltaTime);
-//        transform.Translate(Vector2.up * 0.5f * Time.deltaTime);
-		print ("lowDown");
-//		this.GetComponent<Rigidbody2D> ().velocity -= 2.0f;
+		if (originalSpeed.y > maxSpeed) {
+			Debug.Log ("Slow Down");
+			originalSpeed.y -= 10;
+			GetComponent<Rigidbody2D> ().velocity = originalSpeed;
+		}
 	}
 
 	public void duplicateBall ()

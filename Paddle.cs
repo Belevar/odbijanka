@@ -3,73 +3,64 @@
 [System.Serializable]
 public class Boundary
 {
-	public float xMin, xMax, zMin, zMax;
+	public float xMin, xMax;
 }
 
 
 public class Paddle : MonoBehaviour
 {
-	public SimpleTouchPad touchPad;
 	public bool autoPlay = false;
 	public Rigidbody2D missle;
+	public LevelManager levelManger;
 	private Ball ball;
 	private bool canShoot;
 	Vector3 originalPosition;
 	Vector3 originalSize;
 	bool wasReduced = false;
 	bool wasEnlarged = false;
-	public float speed;
 	public Boundary boundary;
 	private Rigidbody2D rigidbody;
-	int oldMouseX;
-
+	float oldMouseX;
 
 	// Use this for initialization
 	void Start ()
 	{
-		oldMouseX = 0;
 		canShoot = false;
 		ball = GameObject.FindObjectOfType<Ball> ();
 		originalPosition = gameObject.transform.position;
+		oldMouseX = originalPosition.x;
 		originalSize = gameObject.transform.localScale;
 		rigidbody = gameObject.GetComponent<Rigidbody2D> ();
 		if (rigidbody == null) {
-			Debug.LogError ("NAAAAAAAAAAAAAAAAa");
+			Debug.LogError ("PADDLE::NI MA RIGIDBODY");
 		}
 	}
 
 	// Update is called once per frame
 	void Update ()
 	{
+		if(!levelManger.getIfPaused()){
 		if (!autoPlay) {
 			moveWithMouse ();
-			if (Input.GetKeyDown (KeyCode.Space)) {
-				if (canShoot) {
-					shot ();
-				}
+			if (canShoot) {
+				shot ();
 			}
 
 		} else {
 			useAutoPlay ();
-			Debug.LogError ("AUTO PLAY");
+		}
 		}
 	}
 
-	//if palec != paddlePos +- halfSize
 	void moveWithMouse ()
 	{
+
 		float mousePositionInBlocks = Input.mousePosition.x / Screen.width * 16;
-		int deska = (int)this.transform.position.x;
-		int mysz = (int)mousePositionInBlocks;
-		if (mysz != deska) {
-			Vector3 paddlePos;
-			Vector2 velocity = Vector2.right * speed;
-			if (deska < mysz) {
-				paddlePos = this.GetComponent<Rigidbody2D> ().position + velocity * Time.deltaTime;
-			} else {
-				paddlePos = this.GetComponent<Rigidbody2D> ().position + velocity * Time.deltaTime * (-1);
-			}
-			paddlePos.x = Mathf.Clamp (paddlePos.x, 0.5f, 15.5f);
+		int delta = (int)Mathf.Abs (mousePositionInBlocks - oldMouseX);
+		if (delta <= 1) {
+			Vector3 paddlePos = this.transform.position;
+			paddlePos.x = Mathf.Clamp (mousePositionInBlocks, 1.3f, 14.5f);
+			oldMouseX = mousePositionInBlocks;
 			this.transform.position = paddlePos;
 		}
 	}
@@ -78,7 +69,7 @@ public class Paddle : MonoBehaviour
 	{
 		Vector3 paddlePos = new Vector3 (0.5f, this.transform.position.y, 0f);
 		Vector3 ballPos = ball.transform.position;
-		paddlePos.x = Mathf.Clamp (ballPos.x, 0.5f, 15.5f);
+		paddlePos.x = Mathf.Clamp (ballPos.x, boundary.xMin, boundary.xMax);
 		this.transform.position = paddlePos;
 	}
 
@@ -131,13 +122,13 @@ public class Paddle : MonoBehaviour
 
 	void shot ()
 	{
-		Vector3 test = transform.position;
-		test.y += 0.5f;
-		Vector3 test2 = test;
-		test.x += 0.8f;
-		test2.x -= 0.8f;
-		Rigidbody2D clone = Instantiate (missle, test, transform.rotation) as Rigidbody2D;
-		Rigidbody2D clone1 = Instantiate (missle, test2, transform.rotation) as Rigidbody2D;
+		Vector3 misslePos = transform.position;
+		misslePos.y += 0.5f;
+		Vector3 missle2Pos = misslePos;
+		misslePos.x += 0.8f;
+		missle2Pos.x -= 0.8f;
+		Rigidbody2D clone = Instantiate (missle, misslePos, transform.rotation) as Rigidbody2D;
+		Rigidbody2D clone1 = Instantiate (missle, missle2Pos, transform.rotation) as Rigidbody2D;
 		clone1.velocity = clone.velocity = transform.TransformDirection (Vector2.down * 5);
 	}
 }
