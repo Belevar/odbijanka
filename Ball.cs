@@ -12,8 +12,8 @@ public class Ball : MonoBehaviour
 	static private int damage = 1;
 	static public float maxSpeed;
 	static public float minSpeed;
-	private Vector3 originalPosition = new Vector3 ();
-	public Vector2 originalSpeed = new Vector2 (2f, 10f);
+	static private Vector3 originalPosition = new Vector3 ();
+	static public Vector2 originalSpeed = new Vector2 (2f, 10f);
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -24,16 +24,15 @@ public class Ball : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		//co w wypadku kolejnej piłki
 		if (ballCounter == 0) {
 			originalPosition = gameObject.transform.position;
 			isGlued = true;
 			hasStarted = false;
-			paddle = FindObjectOfType<Paddle> ();
-			paddleToBallVector = this.transform.position - paddle.transform.position;
 		}
+		paddle = FindObjectOfType<Paddle> ();
+		paddleToBallVector = this.transform.position - paddle.transform.position;
 		ballCounter += 1;
-
+		Debug.Log ("Start:" + ballCounter);
 	}
 	
 	// Update is called once per frame
@@ -54,26 +53,30 @@ public class Ball : MonoBehaviour
 
 	public void bounceFromThePaddle (float input)
 	{
-		Vector2 test = originalSpeed;
-		test.x *= input;
-		this.GetComponent<Rigidbody2D> ().velocity = test;
+		Vector2 newVelocity = originalSpeed;
+		newVelocity.x *= input;
+		this.GetComponent<Rigidbody2D> ().velocity = newVelocity;
 	}
 
 	public void stickToThePaddle ()
 	{
 		hasStarted = false;
 		isGlued = true;
-		paddleToBallVector = this.transform.position - paddle.transform.position;
-		Vector3 v = this.GetComponent<Rigidbody2D> ().velocity;
+		paddleToBallVector = transform.position - paddle.transform.position;
+		Vector3 v = GetComponent<Rigidbody2D> ().velocity;
 		v.y = 0.0f;
 		v.x = 0.0f;
-		this.GetComponent<Rigidbody2D> ().velocity = v;
+		GetComponent<Rigidbody2D> ().velocity = v;
 	}
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		if (collision.collider.tag == "paddle" && isGlued) {
-			stickToThePaddle ();
+		if (collision.collider.tag == "paddle") {
+			if (isGlued) {
+				stickToThePaddle ();
+			} else {
+
+			}
 		}
 		if (hasStarted) {
 			GetComponent<AudioSource> ().Play ();
@@ -130,7 +133,9 @@ public class Ball : MonoBehaviour
 	public int destroyBall ()
 	{
 		ballCounter--;
-		Destroy (gameObject);
+		Debug.Log ("DestroyBall:" + ballCounter);
+		if (ballCounter > 0)
+			Destroy (gameObject);
 		return ballCounter;
 	}
 

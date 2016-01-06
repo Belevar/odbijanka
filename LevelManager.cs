@@ -9,6 +9,7 @@ public class LevelManager : MonoBehaviour
 	private int lives;
 	private bool paused = false;
 	private List<GameObject> bonusesList;
+	System.Random random; 
 	public int maxLives;
 	public Text brickCounterOutput;
 	public GameObject pauseMenu;
@@ -25,6 +26,7 @@ public class LevelManager : MonoBehaviour
 
 	void Start ()
 	{
+		random = new System.Random ();
 		pauseMenu.SetActive (false);
 		brickCounterOutput.text = "x " + Brick.bricksCounter;
 		Debug.LogError (brickCounterOutput.text);
@@ -115,11 +117,14 @@ public class LevelManager : MonoBehaviour
 
 	public Rigidbody2D getBonus ()
 	{
+		print (bonusesList.Count);
 		if (bonusesList.Count > 0) {
-			Rigidbody2D bonus = bonusesList.Last ().GetComponent<Rigidbody2D> ();
-			bonusesList.RemoveAt (bonusesList.Count - 1);
-			Debug.Log (bonusesList.Count);
-			return bonus;
+			if (random.Next (0, Brick.bricksCounter + 1) <= bonusesList.Count) {
+				Rigidbody2D bonus = bonusesList.Last ().GetComponent<Rigidbody2D> ();
+				bonusesList.RemoveAt (bonusesList.Count - 1);
+				Debug.Log (bonusesList.Count);
+				return bonus;
+			}
 		} 
 		return null;
 	}

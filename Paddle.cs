@@ -75,7 +75,8 @@ public class Paddle : MonoBehaviour
 		foreach (ContactPoint2D placeOnPaddle in collision.contacts) {
 			//Dostosować do różnych wielkości deski 
 			float bounceAngle = (this.GetComponent<Collider2D> ().transform.position.x - placeOnPaddle.point.x) * 1.7f;
-			ball.bounceFromThePaddle (-bounceAngle);
+//			ball.bounceFromThePaddle (-bounceAngle);/
+			collision.gameObject.GetComponent<Ball> ().bounceFromThePaddle (-bounceAngle);
 		}
 	}
 
