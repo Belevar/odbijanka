@@ -3,8 +3,6 @@ using System.Collections;
 
 public class Ball : MonoBehaviour
 {
-
-
 	private Paddle paddle;
 	private Vector3 paddleToBallVector;
 	static private bool hasStarted = false;
@@ -26,15 +24,16 @@ public class Ball : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		//co w wypadku kolejnej piłki
 		if (ballCounter == 0) {
 			originalPosition = gameObject.transform.position;
+			isGlued = true;
+			hasStarted = false;
+			paddle = FindObjectOfType<Paddle> ();
+			paddleToBallVector = this.transform.position - paddle.transform.position;
 		}
-		isGlued = true;
-		hasStarted = false;
 		ballCounter += 1;
-		print ("Start " + ballCounter);
-		paddle = GameObject.FindObjectOfType<Paddle> ();
-		paddleToBallVector = this.transform.position - paddle.transform.position;
+
 	}
 	
 	// Update is called once per frame
@@ -45,8 +44,7 @@ public class Ball : MonoBehaviour
 			int delta = (int)Mathf.Abs (mousePositionInBlocks - paddle.transform.position.y);
 			this.transform.position = paddle.transform.position + paddleToBallVector;
 			if (Input.GetMouseButtonDown (0) && delta <= 1) {
-				Debug.LogError ("Wystrzeliło");
-				this.GetComponent<Rigidbody2D> ().velocity = originalSpeed; 
+				GetComponent<Rigidbody2D> ().velocity = originalSpeed; 
 				hasStarted = true;
 				isGlued = false;
 			}
@@ -75,13 +73,10 @@ public class Ball : MonoBehaviour
 	void OnCollisionEnter2D (Collision2D collision)
 	{
 		if (collision.collider.tag == "paddle" && isGlued) {
-			print ("Glue to pancakes!");
 			stickToThePaddle ();
 		}
 		if (hasStarted) {
-////			Vector2 tweak = new Vector2 (Random.Range (0f, 0.2f), Random.Range (0f, 0.2f));
 			GetComponent<AudioSource> ().Play ();
-//			this.GetComponent<Rigidbody2D> ().velocity += tweak;
 		}
 	}
 
@@ -135,7 +130,6 @@ public class Ball : MonoBehaviour
 	public int destroyBall ()
 	{
 		ballCounter--;
-		print ("destroy " + ballCounter);
 		Destroy (gameObject);
 		return ballCounter;
 	}
@@ -143,7 +137,6 @@ public class Ball : MonoBehaviour
 	public void speedUp ()
 	{
 		if (originalSpeed.y < maxSpeed) {
-			Debug.Log ("Speed UP");
 			originalSpeed.y += 10;
 			gameObject.GetComponent<Rigidbody2D> ().velocity = originalSpeed;
 		}
@@ -152,7 +145,6 @@ public class Ball : MonoBehaviour
 	public void slowDown ()
 	{
 		if (originalSpeed.y > maxSpeed) {
-			Debug.Log ("Slow Down");
 			originalSpeed.y -= 10;
 			GetComponent<Rigidbody2D> ().velocity = originalSpeed;
 		}
@@ -165,7 +157,7 @@ public class Ball : MonoBehaviour
 		Rigidbody2D clone = Instantiate (this.GetComponent<Rigidbody2D> (), transform.position, transform.rotation) as Rigidbody2D;
 		clone.velocity = test;
 		if (clone == null) {
-			Debug.LogError ("Nie bangla");
+			Debug.LogError ("Duplicate Ball::Nie bangla");
 		}
 	}
     

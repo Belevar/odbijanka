@@ -18,11 +18,10 @@ public class Brick : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		levelManager = this.FindObjectOfType<LevelManager> ();
+		levelManager = FindObjectOfType<LevelManager> ();
 		isInvisible = this.tag == "invisible";
 		setBreakable (this.tag == "breakable" || isInvisible);
 		if (isBreakable || isInvisible) {
-			print (bricksCounter);
 			bricksCounter++;
 			levelManager.updateBallCounter ();
 		}
@@ -65,8 +64,6 @@ public class Brick : MonoBehaviour
 		} else {
 			handleHits ();
 		}
-            
-            
 	}
 
 	public void setVisible ()
@@ -77,8 +74,8 @@ public class Brick : MonoBehaviour
 
 	public void makeAllBricksIndestructible ()
 	{   
-		var invisible = GameObject.FindGameObjectsWithTag ("breakable");
-		foreach (var brick in invisible) {
+		var indestructible = GameObject.FindGameObjectsWithTag ("breakable");
+		foreach (var brick in indestructible) {
 			brick.GetComponent<Brick> ().setBreakable (false);
 		}
 	}   
@@ -90,7 +87,7 @@ public class Brick : MonoBehaviour
 
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
-		print ("Działa!"); // a jednak Nie : <
+		print ("BRICK::Działa!"); // a jednak Nie : <
 	}
 
 	void handleHits ()
@@ -109,7 +106,6 @@ public class Brick : MonoBehaviour
 	void destroyBrick ()
 	{
 		bricksCounter--;
-		print (bricksCounter);
 		Destroy (gameObject);
 		checkForBonus ();
 		levelManager.brickDestroyed ();

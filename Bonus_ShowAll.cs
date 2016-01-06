@@ -6,11 +6,6 @@ public class Bonus_ShowAll : Bonus
 
 	public AudioClip bonusSound;
 
-	void Start ()
-	{
-
-	}
-
 	void showInvisible ()
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position);

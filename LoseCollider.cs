@@ -7,7 +7,7 @@ public class LoseCollider : MonoBehaviour
 
 	void Start ()
 	{
-		levelManager = GameObject.FindObjectOfType<LevelManager> ();
+		levelManager = FindObjectOfType<LevelManager> ();
 	}
 
 	void OnTriggerEnter2D (Collider2D trigger)
@@ -18,8 +18,8 @@ public class LoseCollider : MonoBehaviour
 				trigger.gameObject.GetComponent<Ball> ().destroyBall ();
 			} else {
 				if (!levelManager.loseLiveAndCheckEndGame ()) {
-					GameObject.FindObjectOfType<Paddle> ().resetPaddle ();
-					GameObject.FindObjectOfType<Ball> ().resetBall ();
+					FindObjectOfType<Paddle> ().resetPaddle ();
+					FindObjectOfType<Ball> ().resetBall ();
 				}
 			}
 		} else {

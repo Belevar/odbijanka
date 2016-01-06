@@ -1,48 +1,46 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class LevelManager : MonoBehaviour
 {
 	private int lives;
 	private bool paused = false;
+	private List<GameObject> bonusesList;
 	public int maxLives;
 	public Text brickCounterOutput;
 	public GameObject pauseMenu;
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
-	//temp variables
-	bool wasGiven;
 
 	[Serializable]
 	public struct Bonuses
 	{
 		public int quantity;
-		public Rigidbody2D bonusType;
+		public GameObject bonusType;
 	}
 	public Bonuses[] bonuses;
 
 	void Start ()
 	{
-		Debug.LogError ("New Level\n Brick Counter = " + Brick.bricksCounter);
 		pauseMenu.SetActive (false);
 		brickCounterOutput.text = "x " + Brick.bricksCounter;
 		Debug.LogError (brickCounterOutput.text);
-		wasGiven = false;
-		lives = 3;
+		lives = PlayerPrefsManager.getHealthPoint ();
 		livesSprite.sprite = hearts [lives - 1];
-
+		bonusesList = BonusTranslator.convertBonusesToList (bonuses);
 	}
 
 	public bool loseLiveAndCheckEndGame ()
 	{
 		bool endGame = --lives <= 0;
-		print (endGame);
+		PlayerPrefsManager.setHealthPoints (lives);
 		if (endGame) {
 			loadScene ("LoseScreen");
 		}
 		livesSprite.sprite = hearts [lives - 1];
-		brickCounterOutput.text = "X " + Brick.bricksCounter;
 		return endGame;
 	}
 
@@ -50,6 +48,7 @@ public class LevelManager : MonoBehaviour
 	{
 		if (lives < maxLives) {
 			++lives;
+			PlayerPrefsManager.setHealthPoints (lives);
 			livesSprite.sprite = hearts [lives - 1];
 		}
 	}
@@ -67,22 +66,39 @@ public class LevelManager : MonoBehaviour
 	public void loadNextLevel ()
 	{
 		Ball.resetBallCounter ();
+		Brick.bricksCounter = 0;
+		PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
 		Application.LoadLevel (Application.loadedLevel + 1);
 	}
 
 	public void quitRequest ()
 	{
-		Debug.Log ("Quit request!");
 		Application.Quit ();
+	}
+
+	public void startNewGame ()
+	{
+		Ball.resetBallCounter ();
+		Brick.bricksCounter = 0;
+		PlayerPrefsManager.setHealthPoints (3);
+		PlayerPrefsManager.setLevel (1);
+		Application.LoadLevel ("level_1");
 	}
     
 	public void loadScene (string name)
 	{
 		Ball.resetBallCounter ();
-
 		Brick.bricksCounter = 0;
 		Application.LoadLevel (name);
 	}
+
+	public void loadScene ()
+	{
+		Ball.resetBallCounter ();
+		Brick.bricksCounter = 0;
+		Application.LoadLevel ("level_" + PlayerPrefsManager.getLevel ());
+	}
+
 
 	public bool getIfPaused ()
 	{
@@ -99,14 +115,12 @@ public class LevelManager : MonoBehaviour
 
 	public Rigidbody2D getBonus ()
 	{
-		if (bonuses != null) {
-			if (!wasGiven) {
-				wasGiven = true;
-				return bonuses [0].bonusType;
-			} else {
-				//return bonuses [1].bonusType;
-			}
-		}
+		if (bonusesList.Count > 0) {
+			Rigidbody2D bonus = bonusesList.Last ().GetComponent<Rigidbody2D> ();
+			bonusesList.RemoveAt (bonusesList.Count - 1);
+			Debug.Log (bonusesList.Count);
+			return bonus;
+		} 
 		return null;
 	}
 
@@ -121,7 +135,5 @@ public class LevelManager : MonoBehaviour
 			Time.timeScale = 0; 
 			pauseMenu.SetActive (paused);
 		}
-//		Camera.main.backgroundColor.a = 50;
 	}
-
 }

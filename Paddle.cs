@@ -16,22 +16,22 @@ public class Paddle : MonoBehaviour
 	private bool canShoot;
 	Vector3 originalPosition;
 	Vector3 originalSize;
+	float sizeInX;
 	bool wasReduced = false;
 	bool wasEnlarged = false;
 	public Boundary boundary;
-	private Rigidbody2D rigidbody;
 	float oldMouseX;
 
 	// Use this for initialization
 	void Start ()
 	{
 		canShoot = false;
-		ball = GameObject.FindObjectOfType<Ball> ();
+		ball = FindObjectOfType<Ball> ();
 		originalPosition = gameObject.transform.position;
 		oldMouseX = originalPosition.x;
 		originalSize = gameObject.transform.localScale;
-		rigidbody = gameObject.GetComponent<Rigidbody2D> ();
-		if (rigidbody == null) {
+		sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
+		if (gameObject.GetComponent<Rigidbody2D> () == null) {
 			Debug.LogError ("PADDLE::NI MA RIGIDBODY");
 		}
 	}
@@ -39,16 +39,12 @@ public class Paddle : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if(!levelManger.getIfPaused()){
-		if (!autoPlay) {
-			moveWithMouse ();
-			if (canShoot) {
-				shot ();
+		if (!levelManger.getIfPaused ()) {
+			if (!autoPlay) {
+				moveWithMouse ();
+			} else {
+				useAutoPlay ();
 			}
-
-		} else {
-			useAutoPlay ();
-		}
 		}
 	}
 
@@ -59,7 +55,7 @@ public class Paddle : MonoBehaviour
 		int delta = (int)Mathf.Abs (mousePositionInBlocks - oldMouseX);
 		if (delta <= 1) {
 			Vector3 paddlePos = this.transform.position;
-			paddlePos.x = Mathf.Clamp (mousePositionInBlocks, 1.3f, 14.5f);
+			paddlePos.x = Mathf.Clamp (mousePositionInBlocks, sizeInX / 2f - 0.1f, 16f - (sizeInX / 2f) - 0.1f);
 			oldMouseX = mousePositionInBlocks;
 			this.transform.position = paddlePos;
 		}
@@ -72,7 +68,8 @@ public class Paddle : MonoBehaviour
 		paddlePos.x = Mathf.Clamp (ballPos.x, boundary.xMin, boundary.xMax);
 		this.transform.position = paddlePos;
 	}
-
+	//to musi się odbijać piłka w piłce nie w Paddle. Dlatego odbijają się dwie na raz, bo ma dostęp do jednej, a druga robi kolizje.
+	//wtedy pierwsza dostaje odbicie z tej funkcji, a druga z unity(bledne bo zgodne z katem padania).
 	void OnCollisionEnter2D (Collision2D collision)
 	{
 		foreach (ContactPoint2D placeOnPaddle in collision.contacts) {
@@ -85,11 +82,13 @@ public class Paddle : MonoBehaviour
 	public void activateShooting ()
 	{
 		canShoot = true;
+		InvokeRepeating ("shot", 0.00001f, 1f);
 	}
 
 	public void disactivateShooting ()
 	{
 		canShoot = false;
+		CancelInvoke ("shot");
 	}
 
 	public void resetPaddle ()
@@ -111,12 +110,14 @@ public class Paddle : MonoBehaviour
 			wasReduced = true;
 			wasEnlarged = false;
 			transform.localScale += new Vector3 (scale, 0, 0);
+			sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
 		} else if (!wasEnlarged && scale > 0) {
 			wasReduced = false;
 			wasEnlarged = true;
 			transform.localScale += new Vector3 (scale, 0, 0);
+			sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
 		} else {
-			Debug.LogError ("To nie powinno sie nigdy wyświetlić");
+			Debug.LogError ("resizePaddle::To nie powinno sie nigdy wyświetlić");
 		}
 	}
 
@@ -127,6 +128,7 @@ public class Paddle : MonoBehaviour
 		Vector3 missle2Pos = misslePos;
 		misslePos.x += 0.8f;
 		missle2Pos.x -= 0.8f;
+		missle2Pos.y -= 0.05f;
 		Rigidbody2D clone = Instantiate (missle, misslePos, transform.rotation) as Rigidbody2D;
 		Rigidbody2D clone1 = Instantiate (missle, missle2Pos, transform.rotation) as Rigidbody2D;
 		clone1.velocity = clone.velocity = transform.TransformDirection (Vector2.down * 5);

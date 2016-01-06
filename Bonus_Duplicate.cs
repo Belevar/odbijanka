@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Bonus_HP_ADD : Bonus
+public class Bonus_Duplicate : Bonus
 {
 	
 	public AudioClip bonusSound;
@@ -9,13 +9,11 @@ public class Bonus_HP_ADD : Bonus
 	override public	void activateBonus ()
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position);
-		LevelManager manager = FindObjectOfType<LevelManager> ();
-		if (manager == null) {
-			Debug.LogError ("O Panie kto panu tu tak spier***!");
-		} else {
-			manager.addLive ();
-			Destroy (gameObject);
+		Ball[] ballsInGame = FindObjectsOfType<Ball> ();
+		foreach (Ball ball in ballsInGame) {
+			ball.duplicateBall ();
 		}
+		Destroy (gameObject);
 	}
 	
 	void OnTriggerEnter2D (Collider2D trigger)
