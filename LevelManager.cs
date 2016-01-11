@@ -28,10 +28,14 @@ public class LevelManager : MonoBehaviour
 	{
 		random = new System.Random ();
 		pauseMenu.SetActive (false);
-		brickCounterOutput.text = "x " + Brick.bricksCounter;
-		Debug.LogError (brickCounterOutput.text);
+		if (brickCounterOutput != null) {
+			brickCounterOutput.text = "x " + Brick.bricksCounter;
+			Debug.LogError (brickCounterOutput.text);
+		}
 		lives = PlayerPrefsManager.getHealthPoint ();
-		livesSprite.sprite = hearts [lives - 1];
+		if (livesSprite != null) {
+			livesSprite.sprite = hearts [lives - 1];
+		}
 		bonusesList = BonusTranslator.convertBonusesToList (bonuses);
 	}
 

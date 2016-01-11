@@ -6,6 +6,8 @@ public class PlayerPrefsManager : MonoBehaviour
 
 	const string HEALTH_POINTS = "HP";
 	const string LEVEL = "level_";
+	const string MUSIC_VOLUME = "music_volume";
+	const string SOUNDS_VOLUME = "sounds_volume";
 
 
 	public static void setHealthPoints (int hp)
@@ -29,4 +31,23 @@ public class PlayerPrefsManager : MonoBehaviour
 	{
 		return PlayerPrefs.GetInt (LEVEL);
 	}
+
+	public static float getMusicVolume ()
+	{
+		return PlayerPrefs.GetFloat (MUSIC_VOLUME);
+	}
+	public static void setMusicVolume (float volume)
+	{
+		PlayerPrefs.SetFloat (MUSIC_VOLUME, volume);
+	}
+
+	public static float getSoundsVolume ()
+	{
+		return PlayerPrefs.GetFloat (SOUNDS_VOLUME);
+	}
+	public static void setSoundsVolume (float volume)
+	{
+		PlayerPrefs.SetFloat (SOUNDS_VOLUME, volume);
+	}
+
 }

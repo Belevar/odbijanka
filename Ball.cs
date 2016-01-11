@@ -10,10 +10,10 @@ public class Ball : MonoBehaviour
 	static private bool isGlued = true;
 	static private bool isSuperBall = false;
 	static private int damage = 1;
-	static public float maxSpeed;
-	static public float minSpeed;
+	public float maxSpeed;
+	public float minSpeed;
 	static private Vector3 originalPosition = new Vector3 ();
-	static public Vector2 originalSpeed = new Vector2 (2f, 10f);
+	static public Vector2 originalSpeed = new Vector2 (2f, 13f);
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -47,7 +47,19 @@ public class Ball : MonoBehaviour
 				hasStarted = true;
 				isGlued = false;
 			}
-		
+		} else {
+			breakBoringLoop ();
+		}
+	}
+
+	void breakBoringLoop ()
+	{
+		Vector2 temp = GetComponent<Rigidbody2D> ().velocity;
+		print ("Speed:" + temp);
+		if (temp.y < 1.0f && temp.y > 0f) { //To raczej nie powinno tak być
+			Debug.LogError ("Boring Loop? Break IT!");
+			temp.y *= 2.0f;
+			GetComponent<Rigidbody2D> ().velocity = temp;
 		}
 	}
 
@@ -142,15 +154,16 @@ public class Ball : MonoBehaviour
 	public void speedUp ()
 	{
 		if (originalSpeed.y < maxSpeed) {
-			originalSpeed.y += 10;
+			originalSpeed.y += 5;
 			gameObject.GetComponent<Rigidbody2D> ().velocity = originalSpeed;
 		}
 	}
 
 	public void slowDown ()
 	{
+		Vector2 temp = GetComponent<Rigidbody2D> ().velocity;
 		if (originalSpeed.y > maxSpeed) {
-			originalSpeed.y -= 10;
+			originalSpeed.y -= 5;
 			GetComponent<Rigidbody2D> ().velocity = originalSpeed;
 		}
 	}
