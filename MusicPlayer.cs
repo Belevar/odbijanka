@@ -5,7 +5,7 @@ public class MusicPlayer : MonoBehaviour
 {
 
 	static MusicPlayer instance = null;
-	private List<AudioSource> sounds;
+	private float soundVolume;
 
 	void Awake ()
 	{
@@ -13,7 +13,8 @@ public class MusicPlayer : MonoBehaviour
 			Destroy (gameObject);
 		} else {
 			instance = this;
-			sounds = new List<AudioSource> ();
+			soundVolume = PlayerPrefsManager.getSoundsVolume ();
+			changeVolume (PlayerPrefsManager.getMusicVolume ());
 			GameObject.DontDestroyOnLoad (gameObject);
 		}
 	}
@@ -23,27 +24,13 @@ public class MusicPlayer : MonoBehaviour
 		GetComponent<AudioSource> ().volume = volume;
 	}
 
-	public int registerSound (AudioSource sound)
-	{
-		if (!sounds.Contains (sound)) {
-			Debug.LogError ("Dodajemy szefie");
-			sounds.Add (sound);
-			return sounds.Count - 1;
-		} else {
-			Debug.LogError ("JUZ Jest typie");
-			return sounds.IndexOf (sound);
-		}
-	}
-
 	public void changeSoundsVolume (float volume)
 	{
-		foreach (AudioSource sound in sounds) {
-			sound.volume = volume;
-		}
+		soundVolume = volume;
 	}
 
-	public void playSound (int index)
+	public float getVolume ()
 	{
-		sounds [index].Play ();
+		return soundVolume;
 	}
 }

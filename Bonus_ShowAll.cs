@@ -8,7 +8,7 @@ public class Bonus_ShowAll : Bonus
 
 	void showInvisible ()
 	{
-		AudioSource.PlayClipAtPoint (bonusSound, transform.position);
+		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		var invisible = GameObject.FindGameObjectsWithTag ("invisible");
 		foreach (var brick in invisible) {
 			brick.GetComponent<Brick> ().setVisible ();

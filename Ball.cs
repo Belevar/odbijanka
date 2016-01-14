@@ -14,6 +14,7 @@ public class Ball : MonoBehaviour
 	public float minSpeed;
 	static private Vector3 originalPosition = new Vector3 ();
 	static public Vector2 originalSpeed = new Vector2 (2f, 13f);
+	float actualSpeed = 13f;
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -33,19 +34,23 @@ public class Ball : MonoBehaviour
 		paddleToBallVector = this.transform.position - paddle.transform.position;
 		ballCounter += 1;
 		Debug.Log ("Start:" + ballCounter);
+//		stickToThePaddle ();
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-		if (!hasStarted || isGlued) {
-			float mousePositionInBlocks = Input.mousePosition.y / Screen.height * 16;
-			int delta = (int)Mathf.Abs (mousePositionInBlocks - paddle.transform.position.y);
-			this.transform.position = paddle.transform.position + paddleToBallVector;
-			if (Input.GetMouseButtonDown (0) && delta <= 1) {
-				GetComponent<Rigidbody2D> ().velocity = originalSpeed; 
-				hasStarted = true;
-				isGlued = false;
+		if (!hasStarted) {
+			if (isGlued) {
+				float mousePositionInBlocks = Input.mousePosition.y / Screen.height * 16;
+				int delta = (int)Mathf.Abs (mousePositionInBlocks - paddle.transform.position.y);
+				transform.position = paddle.transform.position + paddleToBallVector;
+				if (Input.GetMouseButtonUp (0) && delta <= 1) { //to chyba musi być w paddle(wystrzeliwanie piłek)
+					//i jest to logiczne. Trzeba użyć bounceFromPaddle dla każdej piłki znalezionej i przyklejonej;
+					startFromThePaddle (paddleToBallVector.x);
+					hasStarted = true;
+					isGlued = false;
+				}
 			}
 		} else {
 			breakBoringLoop ();
@@ -63,11 +68,17 @@ public class Ball : MonoBehaviour
 		}
 	}
 
+	public void startFromThePaddle (float input)
+	{
+		Vector2 newVelocity = new Vector2 (input * 2, actualSpeed);
+		GetComponent<Rigidbody2D> ().velocity = newVelocity;
+	}
+
 	public void bounceFromThePaddle (float input)
 	{
 		Vector2 newVelocity = originalSpeed;
 		newVelocity.x *= input;
-		this.GetComponent<Rigidbody2D> ().velocity = newVelocity;
+		GetComponent<Rigidbody2D> ().velocity = newVelocity;
 	}
 
 	public void stickToThePaddle ()
@@ -75,10 +86,7 @@ public class Ball : MonoBehaviour
 		hasStarted = false;
 		isGlued = true;
 		paddleToBallVector = transform.position - paddle.transform.position;
-		Vector3 v = GetComponent<Rigidbody2D> ().velocity;
-		v.y = 0.0f;
-		v.x = 0.0f;
-		GetComponent<Rigidbody2D> ().velocity = v;
+		GetComponent<Rigidbody2D> ().velocity = Vector3.zero;
 	}
 
 	void OnCollisionEnter2D (Collision2D collision)
@@ -86,11 +94,10 @@ public class Ball : MonoBehaviour
 		if (collision.collider.tag == "paddle") {
 			if (isGlued) {
 				stickToThePaddle ();
-			} else {
-
 			}
 		}
 		if (hasStarted) {
+			GetComponent<AudioSource> ().volume = FindObjectOfType<MusicPlayer> ().getVolume ();
 			GetComponent<AudioSource> ().Play ();
 		}
 	}
@@ -133,12 +140,12 @@ public class Ball : MonoBehaviour
 		if (mode == BALL_MODE.SUPER) {
 			isSuperBall = true;
 			setDamage ();
-			this.GetComponent<SpriteRenderer> ().sprite = sprites [1];
+			GetComponent<SpriteRenderer> ().sprite = sprites [1];
 		} else if (mode == BALL_MODE.NORMAL) {
 			Physics2D.IgnoreLayerCollision (gameObject.layer, 10, false);
 			isSuperBall = false;
 			setDamage ();
-			this.GetComponent<SpriteRenderer> ().sprite = sprites [0];
+			GetComponent<SpriteRenderer> ().sprite = sprites [0];
 		}
 	}
 
@@ -161,7 +168,6 @@ public class Ball : MonoBehaviour
 
 	public void slowDown ()
 	{
-		Vector2 temp = GetComponent<Rigidbody2D> ().velocity;
 		if (originalSpeed.y > maxSpeed) {
 			originalSpeed.y -= 5;
 			GetComponent<Rigidbody2D> ().velocity = originalSpeed;
@@ -170,10 +176,10 @@ public class Ball : MonoBehaviour
 
 	public void duplicateBall ()
 	{
-		Vector2 test = originalSpeed;
-		test.x *= -1.0f;
-		Rigidbody2D clone = Instantiate (this.GetComponent<Rigidbody2D> (), transform.position, transform.rotation) as Rigidbody2D;
-		clone.velocity = test;
+		Vector2 duplicateBallSpeed = originalSpeed;
+		duplicateBallSpeed.x *= -1.0f;
+		Rigidbody2D clone = Instantiate (GetComponent<Rigidbody2D> (), transform.position, transform.rotation) as Rigidbody2D;
+		clone.velocity = duplicateBallSpeed;
 		if (clone == null) {
 			Debug.LogError ("Duplicate Ball::Nie bangla");
 		}

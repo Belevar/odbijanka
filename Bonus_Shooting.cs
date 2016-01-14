@@ -8,7 +8,7 @@ public class Bonus_Shooting : Bonus
 	
 	override public	void activateBonus ()
 	{
-		AudioSource.PlayClipAtPoint (bonusSound, transform.position);
+		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		Paddle paddle = FindObjectOfType<Paddle> ();
 		if (paddle == null) {
 			Debug.LogError ("O Panie kto panu tu tak spier***!");

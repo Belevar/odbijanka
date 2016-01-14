@@ -8,7 +8,7 @@ public class Bonus_Duplicate : Bonus
 	
 	override public	void activateBonus ()
 	{
-		AudioSource.PlayClipAtPoint (bonusSound, transform.position);
+		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		Ball[] ballsInGame = FindObjectsOfType<Ball> ();
 		foreach (Ball ball in ballsInGame) {
 			ball.duplicateBall ();

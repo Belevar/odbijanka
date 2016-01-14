@@ -19,6 +19,7 @@ public class OptionsController : MonoBehaviour
 	void Update ()
 	{
 		musicPlayer.changeVolume (musicSlider.value);
+		musicPlayer.changeSoundsVolume (soundsSlider.value);
 	}
 
 	public void saveAndExit ()

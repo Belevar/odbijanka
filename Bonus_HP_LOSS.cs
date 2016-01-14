@@ -8,7 +8,7 @@ public class Bonus_HP_LOSS : Bonus
 	
 	override public	void activateBonus ()
 	{
-		AudioSource.PlayClipAtPoint (bonusSound, transform.position);
+		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		LevelManager manager = FindObjectOfType<LevelManager> ();
 		if (manager == null) {
 			Debug.LogError ("O Panie kto panu tu tak spier***!");

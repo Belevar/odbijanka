@@ -1,12 +1,5 @@
 ﻿using UnityEngine;
 
-[System.Serializable]
-public class Boundary
-{
-	public float xMin, xMax;
-}
-
-
 public class Paddle : MonoBehaviour
 {
 	public bool autoPlay = false;
@@ -19,7 +12,6 @@ public class Paddle : MonoBehaviour
 	float sizeInX;
 	bool wasReduced = false;
 	bool wasEnlarged = false;
-	public Boundary boundary;
 	float oldMouseX;
 
 	// Use this for initialization
@@ -50,7 +42,6 @@ public class Paddle : MonoBehaviour
 
 	void moveWithMouse ()
 	{
-
 		float mousePositionInBlocks = Input.mousePosition.x / Screen.width * 16;
 		int delta = (int)Mathf.Abs (mousePositionInBlocks - oldMouseX);
 		if (delta <= 1) {
@@ -65,17 +56,14 @@ public class Paddle : MonoBehaviour
 	{
 		Vector3 paddlePos = new Vector3 (0.5f, this.transform.position.y, 0f);
 		Vector3 ballPos = ball.transform.position;
-		paddlePos.x = Mathf.Clamp (ballPos.x, boundary.xMin, boundary.xMax);
+		paddlePos.x = Mathf.Clamp (ballPos.x, sizeInX / 2f - 0.1f, 16f - (sizeInX / 2f) - 0.1f);
 		this.transform.position = paddlePos;
 	}
-	//to musi się odbijać piłka w piłce nie w Paddle. Dlatego odbijają się dwie na raz, bo ma dostęp do jednej, a druga robi kolizje.
-	//wtedy pierwsza dostaje odbicie z tej funkcji, a druga z unity(bledne bo zgodne z katem padania).
+
 	void OnCollisionEnter2D (Collision2D collision)
 	{
 		foreach (ContactPoint2D placeOnPaddle in collision.contacts) {
-			//Dostosować do różnych wielkości deski 
 			float bounceAngle = (this.GetComponent<Collider2D> ().transform.position.x - placeOnPaddle.point.x) * 1.7f;
-//			ball.bounceFromThePaddle (-bounceAngle);/
 			collision.gameObject.GetComponent<Ball> ().bounceFromThePaddle (-bounceAngle);
 		}
 	}

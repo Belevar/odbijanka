@@ -9,6 +9,7 @@ public class Brick : MonoBehaviour
 	public AudioClip destroySound;
 	public Rigidbody2D bonus;
 
+	private int clipIndex;
 	private int maxHits;
 	private int timesHit;
 	private LevelManager levelManager;
@@ -52,17 +53,17 @@ public class Brick : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		AudioSource.PlayClipAtPoint (destroySound, transform.position);
+		AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
+//		GetComponent<MusicPlayer> ().playSound (clipIndex);
 		
 		if (collision.gameObject.tag == "ball") {
 			if (Ball.superBall ()) {
 				handleSuperBallAttack ();
 			} else if (isBreakable) {
 				handleHits ();
-		    
 			}
 		} else {
-			handleHits ();
+			handleHits (); // to jakiś błąd założeń, bo pociski będą rozwalały nawet niezniszczalne...
 		}
 	}
 
@@ -126,3 +127,7 @@ public class Brick : MonoBehaviour
 	}
 
 }
+// void setBreakable (bool gac)}
+//{  
+//	bonus Gac = null }
+//:3
