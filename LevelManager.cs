@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class LevelManager : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class LevelManager : MonoBehaviour
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
 
+	public AudioClip clickMusic;
+
 	[Serializable]
 	public struct Bonuses
 	{
@@ -27,9 +30,9 @@ public class LevelManager : MonoBehaviour
 	void Start ()
 	{
 		random = new System.Random ();
-		pauseMenu.SetActive (false);
 		if (brickCounterOutput != null) {
 			brickCounterOutput.text = "x " + Brick.bricksCounter;
+			pauseMenu.SetActive (false);
 			Debug.LogError (brickCounterOutput.text);
 		}
 		lives = PlayerPrefsManager.getHealthPoint ();
@@ -43,6 +46,12 @@ public class LevelManager : MonoBehaviour
 	{
 		bool endGame = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
+		Brick[] bricksInGame = FindObjectsOfType<Brick> ();
+		foreach (Brick brick in bricksInGame) {
+			if (brick.tag == "breakable") {
+				brick.makeBrickIndestructibleEnd ();
+			}
+		}
 		if (endGame) {
 			loadScene ("LoseScreen");
 		}
@@ -90,9 +99,18 @@ public class LevelManager : MonoBehaviour
 		PlayerPrefsManager.setLevel (1);
 		Application.LoadLevel ("level_1");
 	}
-    
+
+	IEnumerator Example ()
+	{
+		print (Time.time);
+		yield return new WaitForSeconds (5);
+		print (Time.time);
+	}
+	
 	public void loadScene (string name)
 	{
+		AudioSource.PlayClipAtPoint (clickMusic, transform.position, PlayerPrefsManager.getSoundsVolume ());
+//		StartCoroutine (Example ());
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
 		Application.LoadLevel (name);

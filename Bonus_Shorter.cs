@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Bonus_Duplicate : Bonus
+public class Bonus_Shorter : Bonus
 {
 	
 	public AudioClip bonusSound;
@@ -9,17 +9,18 @@ public class Bonus_Duplicate : Bonus
 	override public	void activateBonus ()
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
-		Ball[] ballsInGame = FindObjectsOfType<Ball> ();
-		foreach (Ball ball in ballsInGame) {
-			ball.duplicateBall ();
+		Paddle paddle = FindObjectOfType<Paddle> ();
+		if (paddle == null) {
+			Debug.LogError ("O Panie kto panu tu tak spier***!");
 		}
+		paddle.resizePaddle (-1f);
 		Destroy (gameObject);
 	}
 
 	override public	void disactivate ()
 	{
 	}
-	
+
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "paddle") {

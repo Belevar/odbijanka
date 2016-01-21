@@ -17,6 +17,10 @@ public class Bonus_HP_ADD : Bonus
 			Destroy (gameObject);
 		}
 	}
+
+	override public	void disactivate ()
+	{
+	}
 	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{

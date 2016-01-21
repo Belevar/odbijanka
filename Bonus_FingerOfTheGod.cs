@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
-public class Bonus_Duplicate : Bonus
+public class Bonus_FingerOfTheGod : Bonus
 {
 	
 	public AudioClip bonusSound;
@@ -9,10 +9,11 @@ public class Bonus_Duplicate : Bonus
 	override public	void activateBonus ()
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
-		Ball[] ballsInGame = FindObjectsOfType<Ball> ();
-		foreach (Ball ball in ballsInGame) {
-			ball.duplicateBall ();
+		/*Paddle paddle = FindObjectOfType<Paddle> ();
+		if (paddle == null) {
+			Debug.LogError ("O Panie kto panu tu tak spier***!");
 		}
+		paddle.activateShooting ();*/
 		Destroy (gameObject);
 	}
 

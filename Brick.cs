@@ -8,6 +8,8 @@ public class Brick : MonoBehaviour
 	public Sprite[] sprites;
 	public AudioClip destroySound;
 	public Rigidbody2D bonus;
+	public Sprite indestructibleSprite;
+	private Sprite orginalSprite;
 
 	private int clipIndex;
 	private int maxHits;
@@ -26,6 +28,7 @@ public class Brick : MonoBehaviour
 			bricksCounter++;
 			levelManager.updateBallCounter ();
 		}
+		orginalSprite = GetComponent<SpriteRenderer> ().sprite;
 		maxHits = sprites.Length + 1;
 		if (isInvisible) {
 			gameObject.GetComponent<SpriteRenderer> ().enabled = false;
@@ -34,17 +37,12 @@ public class Brick : MonoBehaviour
 		timesHit = 0;
 	}
 	
-	// Update is called once per frame
-	void Update ()
-	{
-		
-	}
-
 	void loadSprites ()
 	{
 		int spriteIndex = timesHit - 1;
 		if (sprites [spriteIndex]) {
-			this.GetComponent<SpriteRenderer> ().sprite = sprites [spriteIndex];
+			orginalSprite = sprites [spriteIndex];
+			GetComponent<SpriteRenderer> ().sprite = sprites [spriteIndex];
 		} else {
 			Debug.LogError ("Missing sprite for Brick. Add it!");
 		}
@@ -53,18 +51,12 @@ public class Brick : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
-//		GetComponent<MusicPlayer> ().playSound (clipIndex);
-		
-		if (collision.gameObject.tag == "ball") {
-			if (Ball.superBall ()) {
-				handleSuperBallAttack ();
-			} else if (isBreakable) {
+		if (collision.gameObject.tag == "ball" || collision.gameObject.tag == "finger" || collision.gameObject.tag == "missle") {
+			if (isBreakable) {
+				AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 				handleHits ();
 			}
-		} else {
-			handleHits (); // to jakiś błąd założeń, bo pociski będą rozwalały nawet niezniszczalne...
-		}
+		} 
 	}
 
 	public void setVisible ()
@@ -73,25 +65,36 @@ public class Brick : MonoBehaviour
 		gameObject.GetComponent<SpriteRenderer> ().enabled = true;
 	}
 
-	public void makeAllBricksIndestructible ()
+	public void makeBrickIndestructible ()
 	{   
-		var indestructible = GameObject.FindGameObjectsWithTag ("breakable");
-		foreach (var brick in indestructible) {
-			brick.GetComponent<Brick> ().setBreakable (false);
-		}
+		//dodać wczytywanie 
+//		GetComponent<Brick> ().setBreakable (false);
+		setBreakable (false);
+		GetComponent<SpriteRenderer> ().sprite = indestructibleSprite;
 	}   
 
-	void handleSuperBallAttack ()
-	{
-		Debug.LogError ("Pewnie ta funkcja bedzie do usuniecia - trzeba wylaczyc kolizje");
-	}
-
+	public void makeBrickIndestructibleEnd ()
+	{   
+//		GetComponent<Brick> ().setBreakable (true);
+		setBreakable (true);
+		GetComponent<SpriteRenderer> ().sprite = orginalSprite;
+	}   
+	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
-		print ("BRICK::Działa!"); // a jednak Nie : <
+		if (trigger.gameObject.tag == "ball") {
+			if (isBreakable) {
+				destroyBrick ();
+			}
+		} else if (trigger.gameObject.tag == "finger") {
+			if (isBreakable) {
+				Destroy (trigger);
+				handleHits ();
+			}
+		}
 	}
 
-	void handleHits ()
+	public void handleHits ()
 	{
 		timesHit += Ball.getDamage ();
 		if (timesHit == 1 && isInvisible) {

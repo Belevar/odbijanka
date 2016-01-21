@@ -15,6 +15,10 @@ public class Bonus_Slow : Bonus
 		}
 		Destroy (gameObject);
 	}
+
+	override public	void disactivate ()
+	{
+	}
 	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{

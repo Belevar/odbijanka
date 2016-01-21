@@ -16,6 +16,10 @@ public class Bonus_Shooting : Bonus
 		paddle.activateShooting ();
 		Destroy (gameObject);
 	}
+
+	override public	void disactivate ()
+	{
+	}
 	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{

@@ -15,6 +15,7 @@ public class Ball : MonoBehaviour
 	static private Vector3 originalPosition = new Vector3 ();
 	static public Vector2 originalSpeed = new Vector2 (2f, 13f);
 	float actualSpeed = 13f;
+	public GameObject fingerOfTheGod;
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -40,11 +41,20 @@ public class Ball : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+		if (Input.GetMouseButtonUp (0)) {
+			Vector3 fingerPos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+			Instantiate (fingerOfTheGod, fingerPos, Quaternion.identity);
+
+		}
 		if (!hasStarted) {
 			if (isGlued) {
-				float mousePositionInBlocks = Input.mousePosition.y / Screen.height * 16;
-				int delta = (int)Mathf.Abs (mousePositionInBlocks - paddle.transform.position.y);
+				Vector3 fingerPos = Input.mousePosition;
+				fingerPos = Camera.main.ScreenToWorldPoint (fingerPos);
+				float mousePositionInBlocksY = Input.mousePosition.y / Screen.height * 16;
+				float mousePositionInBlocksX = Input.mousePosition.x / Screen.height * 9;
+				int delta = (int)Mathf.Abs (mousePositionInBlocksY - paddle.transform.position.y);
 				transform.position = paddle.transform.position + paddleToBallVector;
+
 				if (Input.GetMouseButtonUp (0) && delta <= 1) { //to chyba musi być w paddle(wystrzeliwanie piłek)
 					//i jest to logiczne. Trzeba użyć bounceFromPaddle dla każdej piłki znalezionej i przyklejonej;
 					startFromThePaddle (paddleToBallVector.x);
@@ -53,17 +63,21 @@ public class Ball : MonoBehaviour
 				}
 			}
 		} else {
-			breakBoringLoop ();
+//			TODO cos z boringLoop trze zrobic
+//			breakBoringLoop ();
 		}
 	}
 
 	void breakBoringLoop ()
 	{
 		Vector2 temp = GetComponent<Rigidbody2D> ().velocity;
-		print ("Speed:" + temp);
 		if (temp.y < 1.0f && temp.y > 0f) { //To raczej nie powinno tak być
 			Debug.LogError ("Boring Loop? Break IT!");
 			temp.y *= 2.0f;
+			GetComponent<Rigidbody2D> ().velocity = temp;
+		} else if (temp.x < 1.0f && temp.x > 0f) { //To raczej nie powinno tak być
+			Debug.LogError ("Boring Loop? Break IT!");
+			temp.x *= 2.0f;
 			GetComponent<Rigidbody2D> ().velocity = temp;
 		}
 	}
@@ -105,15 +119,10 @@ public class Ball : MonoBehaviour
 	public void resetBall ()
 	{
 		gameObject.transform.position = originalPosition;
-//		changeBallMode (BALL_MODE.NORMAL);
+		changeBallMode (BALL_MODE.NORMAL);
 		stickToThePaddle ();
 	}
-
-	static private void setDamage ()
-	{
-		damage = isSuperBall ? 10 : 1;
-	}
-
+	
 	static public int getDamage ()
 	{
 		return damage;
@@ -139,13 +148,14 @@ public class Ball : MonoBehaviour
 	{
 		if (mode == BALL_MODE.SUPER) {
 			isSuperBall = true;
-			setDamage ();
 			GetComponent<SpriteRenderer> ().sprite = sprites [1];
 		} else if (mode == BALL_MODE.NORMAL) {
-			Physics2D.IgnoreLayerCollision (gameObject.layer, 10, false);
 			isSuperBall = false;
-			setDamage ();
 			GetComponent<SpriteRenderer> ().sprite = sprites [0];
+			GameObject[] bricksInGame = GameObject.FindGameObjectsWithTag ("breakable");
+			foreach (GameObject brick in bricksInGame) {
+				brick.GetComponent<PolygonCollider2D> ().isTrigger = false;
+			}
 		}
 	}
 

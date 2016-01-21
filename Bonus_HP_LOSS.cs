@@ -17,7 +17,11 @@ public class Bonus_HP_LOSS : Bonus
 			manager.loseLiveAndCheckEndGame ();
 		}
 	}
-	
+
+	override public	void disactivate ()
+	{
+	}
+
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "paddle") {
