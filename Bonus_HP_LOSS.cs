@@ -13,13 +13,9 @@ public class Bonus_HP_LOSS : Bonus
 		if (manager == null) {
 			Debug.LogError ("O Panie kto panu tu tak spier***!");
 		} else {
-			Destroy (gameObject);
 			manager.loseLiveAndCheckEndGame ();
+			Destroy (gameObject);
 		}
-	}
-
-	override public	void disactivate ()
-	{
 	}
 
 	void OnTriggerEnter2D (Collider2D trigger)

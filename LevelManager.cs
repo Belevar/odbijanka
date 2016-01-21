@@ -46,12 +46,7 @@ public class LevelManager : MonoBehaviour
 	{
 		bool endGame = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
-		Brick[] bricksInGame = FindObjectsOfType<Brick> ();
-		foreach (Brick brick in bricksInGame) {
-			if (brick.tag == "breakable") {
-				brick.makeBrickIndestructibleEnd ();
-			}
-		}
+		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
 		if (endGame) {
 			loadScene ("LoseScreen");
 		}

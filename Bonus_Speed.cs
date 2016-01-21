@@ -16,10 +16,6 @@ public class Bonus_Speed : Bonus
 		Destroy (gameObject);
 	}
 
-	override public	void disactivate ()
-	{
-	}
-	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "paddle") {

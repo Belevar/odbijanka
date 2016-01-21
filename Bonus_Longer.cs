@@ -17,9 +17,6 @@ public class Bonus_Longer : Bonus
 		Destroy (gameObject);
 	}
 
-	override public	void disactivate ()
-	{
-	}
 
 	void OnTriggerEnter2D (Collider2D trigger)
 	{

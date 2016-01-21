@@ -18,10 +18,6 @@ public class Bonus_HP_ADD : Bonus
 		}
 	}
 
-	override public	void disactivate ()
-	{
-	}
-	
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "paddle") {

@@ -21,10 +21,6 @@ public class Bonus_ShowAll : Bonus
 		showInvisible ();
 	}
 
-	override public	void disactivate ()
-	{
-	}
-
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "paddle") {

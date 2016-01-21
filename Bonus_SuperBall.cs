@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Bonus_SuperBall : Bonus
+public class Bonus_SuperBall : TimeBonus
 {
 	
 	public AudioClip bonusSound;
@@ -9,7 +9,6 @@ public class Bonus_SuperBall : Bonus
 	override public	void activateBonus ()
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
-		Destroy (gameObject);
 		GameObject[] bricksInGame = GameObject.FindGameObjectsWithTag ("breakable");
 		foreach (GameObject brick in bricksInGame) {
 			brick.GetComponent<PolygonCollider2D> ().isTrigger = true;
@@ -18,6 +17,9 @@ public class Bonus_SuperBall : Bonus
 		foreach (Ball ball in ballsInGame) {
 			ball.changeBallMode (Ball.BALL_MODE.SUPER);
 		}
+		FindObjectOfType<BonusManager> ().registerTimeBonus (this);
+		transform.position = new Vector3 (-10f, -10f, -10f);
+		GetComponent<SpriteRenderer> ().enabled = false;
 	}
 
 	override public	void disactivate ()

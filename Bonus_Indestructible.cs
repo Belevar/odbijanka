@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
-public class Bonus_Indestructible : Bonus
+public class Bonus_Indestructible : TimeBonus
 {
 	
 	public AudioClip bonusSound;
@@ -15,7 +16,7 @@ public class Bonus_Indestructible : Bonus
 				brick.makeBrickIndestructible ();
 			}
 		}
-		FindObjectOfType<BonusManager> ().registerBonus (this);
+		FindObjectOfType<BonusManager> ().registerTimeBonus (this);
 		transform.position = new Vector3 (-10f, -10f, -10f);
 		GetComponent<SpriteRenderer> ().enabled = false;
 	}
