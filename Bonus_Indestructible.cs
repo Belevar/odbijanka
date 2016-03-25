@@ -11,6 +11,7 @@ public class Bonus_Indestructible : TimeBonus
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		Brick[] bricksInGame = FindObjectsOfType<Brick> ();
+        Brick.areIndestructible = true;
 		foreach (Brick brick in bricksInGame) {
 			if (brick.tag == "breakable") {
 				brick.makeBrickIndestructible ();
@@ -23,6 +24,7 @@ public class Bonus_Indestructible : TimeBonus
 
 	override public	void disactivate ()
 	{
+        Brick.areIndestructible = false;
 		Brick[] bricksInGame = FindObjectsOfType<Brick> ();
 		foreach (Brick brick in bricksInGame) {
 			if (brick.tag == "breakable") {

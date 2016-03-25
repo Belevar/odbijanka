@@ -10,9 +10,13 @@ public class Bonus_SuperBall : TimeBonus
 	{
 		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		GameObject[] bricksInGame = GameObject.FindGameObjectsWithTag ("breakable");
-		foreach (GameObject brick in bricksInGame) {
-			brick.GetComponent<PolygonCollider2D> ().isTrigger = true;
-		}
+        if (!Brick.areIndestructible)
+        {
+            foreach (GameObject brick in bricksInGame)
+            {
+                brick.GetComponent<PolygonCollider2D>().isTrigger = true;
+            }
+        }
 		Ball[] ballsInGame = FindObjectsOfType<Ball> ();
 		foreach (Ball ball in ballsInGame) {
 			ball.changeBallMode (Ball.BALL_MODE.SUPER);
@@ -24,6 +28,11 @@ public class Bonus_SuperBall : TimeBonus
 
 	override public	void disactivate ()
 	{
+        Ball[] ballsInGame = FindObjectsOfType<Ball>();
+        foreach (Ball ball in ballsInGame)
+        {
+            ball.changeBallMode(Ball.BALL_MODE.NORMAL);
+        }
 	}
 
 	void OnTriggerEnter2D (Collider2D trigger)

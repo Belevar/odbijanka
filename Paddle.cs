@@ -4,25 +4,26 @@ public class Paddle : MonoBehaviour
 {
 	public bool autoPlay = false;
 	public Rigidbody2D missle;
-	public LevelManager levelManger;
+	private LevelManager levelManger;
 	private Ball ball;
-	private bool canShoot;
 	Vector3 originalPosition;
 	Vector3 originalSize;
 	float sizeInX;
-	bool wasReduced = false;
-	bool wasEnlarged = false;
 	float oldMouseX;
+    float[] paddleSizes = { 0.5f, 0.8f, 1.1f, 1.4f, 1.7f };
+    int indexOfCurrentSize = 2;
+    bool shooting;
 
 	// Use this for initialization
 	void Start ()
 	{
-		canShoot = false;
+        shooting = false;
 		ball = FindObjectOfType<Ball> ();
 		originalPosition = gameObject.transform.position;
 		oldMouseX = originalPosition.x;
 		originalSize = gameObject.transform.localScale;
 		sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
+        levelManger= FindObjectOfType<LevelManager>();
 		if (gameObject.GetComponent<Rigidbody2D> () == null) {
 			Debug.LogError ("PADDLE::NI MA RIGIDBODY");
 		}
@@ -31,13 +32,13 @@ public class Paddle : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (!levelManger.getIfPaused ()) {
-			if (!autoPlay) {
+		if (!levelManger.gameIsPaused ()) {
+            if (!autoPlay) {
 				moveWithMouse ();
 			} else {
 				useAutoPlay ();
 			}
-		}
+        }
 	}
 
 	void moveWithMouse ()
@@ -60,32 +61,30 @@ public class Paddle : MonoBehaviour
 		this.transform.position = paddlePos;
 	}
 
-	void OnCollisionEnter2D (Collision2D collision)
-	{
-		foreach (ContactPoint2D placeOnPaddle in collision.contacts) {
-			float bounceAngle = (this.GetComponent<Collider2D> ().transform.position.x - placeOnPaddle.point.x) * 1.7f;
-			collision.gameObject.GetComponent<Ball> ().bounceFromThePaddle (-bounceAngle);
-		}
-	}
-
 	public void activateShooting ()
 	{
-		canShoot = true;
 		InvokeRepeating ("shot", 0.00001f, 1f);
+        shooting = true;
 	}
 
 	public void disactivateShooting ()
 	{
-		canShoot = false;
 		CancelInvoke ("shot");
+        shooting = false;
 	}
+
+    public bool isShooting()
+    {
+        return shooting;
+    }
 
 	public void resetPaddle ()
 	{
 		gameObject.transform.position = originalPosition;
 		gameObject.transform.localScale = originalSize;
 		disactivateShooting ();
-		wasReduced = wasEnlarged = false;
+        indexOfCurrentSize = 2;
+        sizeInX = gameObject.GetComponent<BoxCollider2D>().bounds.size.x;
 	}
 
 	public Vector3 getPosition ()
@@ -93,30 +92,38 @@ public class Paddle : MonoBehaviour
 		return originalPosition;
 	}
 
-	public void resizePaddle (float scale)
+	public void makeShorter ()
 	{
-		if (!wasReduced && scale < 0) {
-			wasReduced = true;
-			wasEnlarged = false;
-			transform.localScale += new Vector3 (scale, 0, 0);
-			sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
-		} else if (!wasEnlarged && scale > 0) {
-			wasReduced = false;
-			wasEnlarged = true;
-			transform.localScale += new Vector3 (scale, 0, 0);
-			sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
-		} else {
-			Debug.LogError ("resizePaddle::To nie powinno sie nigdy wyświetlić");
-		}
+        if (indexOfCurrentSize > 0)
+        {
+            --indexOfCurrentSize;
+            Vector2 newScale = transform.localScale;
+            newScale.x = paddleSizes[indexOfCurrentSize];
+            transform.localScale = newScale;
+            sizeInX = gameObject.GetComponent<BoxCollider2D>().bounds.size.x;
+        }
 	}
+
+    public void makeLonger()
+    {
+        if (indexOfCurrentSize < paddleSizes.Length - 1)
+        {
+            ++indexOfCurrentSize;
+            Vector2 newScale = transform.localScale;
+            newScale.x = paddleSizes[indexOfCurrentSize];
+            transform.localScale = newScale;
+            sizeInX = gameObject.GetComponent<BoxCollider2D>().bounds.size.x;
+        }
+    }
 
 	void shot ()
 	{
-		Vector3 misslePos = transform.position;
+        float halfPaddleLenght = gameObject.GetComponent<BoxCollider2D>().bounds.size.x / 2f;
+		Vector2 misslePos = transform.position;
 		misslePos.y += 0.5f;
-		Vector3 missle2Pos = misslePos;
-		misslePos.x += 0.8f;
-		missle2Pos.x -= 0.8f;
+		Vector2 missle2Pos = misslePos;
+		misslePos.x += halfPaddleLenght - 0.25f;
+		missle2Pos.x -= halfPaddleLenght - 0.25f;
 		missle2Pos.y -= 0.05f;
 		Rigidbody2D clone = Instantiate (missle, misslePos, transform.rotation) as Rigidbody2D;
 		Rigidbody2D clone1 = Instantiate (missle, missle2Pos, transform.rotation) as Rigidbody2D;

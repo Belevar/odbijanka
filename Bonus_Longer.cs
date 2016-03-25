@@ -13,7 +13,7 @@ public class Bonus_Longer : Bonus
 		if (paddle == null) {
 			Debug.LogError ("O Panie kto panu tu tak spier***!");
 		}
-		paddle.resizePaddle (1f);
+		paddle.makeLonger();
 		Destroy (gameObject);
 	}
 

@@ -4,11 +4,13 @@ using System.Collections;
 public class Brick : MonoBehaviour
 {
 	public static int bricksCounter = 0;
+    public static bool areIndestructible = false;
 
 	public Sprite[] sprites;
 	public AudioClip destroySound;
 	public Rigidbody2D bonus;
 	public Sprite indestructibleSprite;
+	public bool isMoveable;
 	private Sprite orginalSprite;
 
 	private int clipIndex;
@@ -18,12 +20,49 @@ public class Brick : MonoBehaviour
 	private bool isBreakable;
 	private bool isInvisible;
 
+	public float width = 0.9f;
+	public float height = 5f;
+	public float speed = 5f;
+	bool movingRight = true;
+	float xMin;
+	float xMax;
+	
+
+
+	void Update ()
+	{
+//		if (isMoveable) {
+//			if (movingRight) {
+//				transform.position += Vector3.right * speed * Time.deltaTime;
+//			} else {
+//				transform.position += Vector3.left * speed * Time.deltaTime;
+//			}
+//		
+//			float leftEdgeOfFormation = transform.position.x - (0.5f * width);
+//			float rightEdgeOfFormation = transform.position.x + (0.5f * width);
+//			if (leftEdgeOfFormation < xMin) {
+//				movingRight = true;
+//			} else if (rightEdgeOfFormation > xMax) {
+//				movingRight = false;
+//			}
+//		}
+	}
+
 	// Use this for initialization
 	void Start ()
 	{
+        areIndestructible = false;
 		levelManager = FindObjectOfType<LevelManager> ();
 		isInvisible = this.tag == "invisible";
 		setBreakable (this.tag == "breakable" || isInvisible);
+		if (isMoveable) {
+//			float distanceToCamera = transform.position.z - Camera.main.transform.position.z;
+//			Vector3 leftEdge = Camera.main.ViewportToWorldPoint (new Vector3 (0, 0, distanceToCamera));
+//			Vector3 rightEdge = Camera.main.ViewportToWorldPoint (new Vector3 (1, 0, distanceToCamera));
+//			xMax = rightEdge.x;
+//			xMin = leftEdge.x;
+//			GetComponent<Rigidbody2D> ().velocity = Vector2.right * speed;
+		}
 		if (isBreakable || isInvisible) {
 			bricksCounter++;
 			levelManager.updateBallCounter ();
@@ -51,10 +90,28 @@ public class Brick : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		if (collision.gameObject.tag == "ball" || collision.gameObject.tag == "finger" || collision.gameObject.tag == "missle") {
+		Debug.LogError ("Collisoin");
+		if (collision.gameObject.tag == "ball" || collision.gameObject.tag == "missle") {
 			if (isBreakable) {
 				AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 				handleHits ();
+			}
+		} else {
+//			if (movingRight) {
+//				GetComponent<Rigidbody2D> ().velocity = Vector2.left * speed;
+//				movingRight = false;
+//			} else {
+//				GetComponent<Rigidbody2D> ().velocity = Vector2.right * speed;
+//				movingRight = true;
+//			}
+		}
+	}
+
+	void OnTriggerEnter2D (Collider2D trigger)
+	{
+		if (trigger.gameObject.tag == "ball") {
+			if (isBreakable) {
+				destroyBrick ();
 			}
 		} 
 	}
@@ -66,33 +123,21 @@ public class Brick : MonoBehaviour
 	}
 
 	public void makeBrickIndestructible ()
-	{   
-		//dodać wczytywanie 
-//		GetComponent<Brick> ().setBreakable (false);
+	{
+        if (Ball.superBall() || FindObjectOfType<Paddle>().isShooting())
+        {
+            GetComponent<PolygonCollider2D> ().isTrigger = false;
+        }
 		setBreakable (false);
 		GetComponent<SpriteRenderer> ().sprite = indestructibleSprite;
 	}   
 
 	public void makeBrickIndestructibleEnd ()
-	{   
-//		GetComponent<Brick> ().setBreakable (true);
+	{
 		setBreakable (true);
 		GetComponent<SpriteRenderer> ().sprite = orginalSprite;
 	}   
-	
-	void OnTriggerEnter2D (Collider2D trigger)
-	{
-		if (trigger.gameObject.tag == "ball") {
-			if (isBreakable) {
-				destroyBrick ();
-			}
-		} else if (trigger.gameObject.tag == "finger") {
-			if (isBreakable) {
-				Destroy (trigger);
-				handleHits ();
-			}
-		}
-	}
+
 
 	public void handleHits ()
 	{
@@ -128,6 +173,15 @@ public class Brick : MonoBehaviour
 	{
 		isBreakable = breakable;
 	}
+
+    void OnMouseDown()
+    {
+        if (!levelManager.gameIsPaused() && isBreakable && levelManager.isFingerOfGodActive()) 
+        {
+            destroyBrick();
+        }
+       
+    }
 
 }
 // void setBreakable (bool gac)}

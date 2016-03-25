@@ -4,20 +4,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
 	private int lives;
 	private bool paused = false;
 	private List<GameObject> bonusesList;
-	System.Random random; 
+	bool fingerOfGod = false;
+    System.Random random; 
 	public int maxLives;
 	public Text brickCounterOutput;
 	public GameObject pauseMenu;
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
 
-	public AudioClip clickMusic;
+
 
 	[Serializable]
 	public struct Bonuses
@@ -47,6 +49,7 @@ public class LevelManager : MonoBehaviour
 		bool endGame = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
+        FindObjectOfType<BonusManager>().resetAllBonuses() ;
 		if (endGame) {
 			loadScene ("LoseScreen");
 		}
@@ -78,8 +81,8 @@ public class LevelManager : MonoBehaviour
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
 		PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
-		Application.LoadLevel (Application.loadedLevel + 1);
-	}
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
 
 	public void quitRequest ()
 	{
@@ -92,7 +95,7 @@ public class LevelManager : MonoBehaviour
 		Brick.bricksCounter = 0;
 		PlayerPrefsManager.setHealthPoints (3);
 		PlayerPrefsManager.setLevel (1);
-		Application.LoadLevel ("level_1");
+        SceneManager.LoadScene("level_1");
 	}
 
 	IEnumerator Example ()
@@ -104,22 +107,25 @@ public class LevelManager : MonoBehaviour
 	
 	public void loadScene (string name)
 	{
-		AudioSource.PlayClipAtPoint (clickMusic, transform.position, PlayerPrefsManager.getSoundsVolume ());
-//		StartCoroutine (Example ());
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
-		Application.LoadLevel (name);
+		SceneManager.LoadScene (name);
+
+
 	}
 
 	public void loadScene ()
 	{
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
-		Application.LoadLevel ("level_" + PlayerPrefsManager.getLevel ());
+        if (PlayerPrefsManager.getHealthPoint() > 0)
+        {
+            SceneManager.LoadScene("level_" + PlayerPrefsManager.getLevel());
+        }
 	}
 
 
-	public bool getIfPaused ()
+	public bool gameIsPaused ()
 	{
 		return paused;
 	}
@@ -134,7 +140,6 @@ public class LevelManager : MonoBehaviour
 
 	public Rigidbody2D getBonus ()
 	{
-		print (bonusesList.Count);
 		if (bonusesList.Count > 0) {
 			if (random.Next (0, Brick.bricksCounter + 1) <= bonusesList.Count) {
 				Rigidbody2D bonus = bonusesList.Last ().GetComponent<Rigidbody2D> ();
@@ -158,4 +163,19 @@ public class LevelManager : MonoBehaviour
 			pauseMenu.SetActive (paused);
 		}
 	}
+
+    public void activateFingerOfGod()
+    {
+        fingerOfGod = true;
+    }
+
+    public void disactivateFingerOfGod()
+    {
+        fingerOfGod = false;
+    }
+
+    public bool isFingerOfGodActive()
+    {
+        return fingerOfGod;
+    }
 }
