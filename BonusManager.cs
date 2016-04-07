@@ -47,7 +47,7 @@ public class BonusManager : MonoBehaviour {
     public void moveBonus()
     {
         //SHOULD CHECK IF newPos is on THE LEFT SIDE 
-       // Transform newPos = NextFreePosition();
+       //Transform newPos = NextFreePosition();
         var currentBonuses = new List<Slider>(timeBonuses.Values);
         foreach (Slider bonus in currentBonuses)
         {
@@ -108,7 +108,6 @@ public class BonusManager : MonoBehaviour {
                 Debug.Log("Nie stworzyłem go :<");
             }
             enemy.transform.SetParent(freePosition);
-            enemy.transform.localScale = freePosition.transform.localScale;
             return enemy;
         }
         return null;

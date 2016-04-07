@@ -130,11 +130,6 @@ public class Ball : MonoBehaviour
 		stickToThePaddle ();
 	}
 	
-	static public int getDamage ()
-	{
-		return damage;
-	}
-    
 	static public bool superBall ()
 	{
 		return isSuperBall; 

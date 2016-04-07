@@ -8,6 +8,7 @@ public class PlayerPrefsManager : MonoBehaviour
 	const string LEVEL = "level_";
 	const string MUSIC_VOLUME = "music_volume";
 	const string SOUNDS_VOLUME = "sounds_volume";
+    const string GAME_LOADED = "game_loaded";
 
 
 	public static void setHealthPoints (int hp)
@@ -49,5 +50,14 @@ public class PlayerPrefsManager : MonoBehaviour
 	{
 		PlayerPrefs.SetFloat (SOUNDS_VOLUME, volume);
 	}
+
+    public static void setGameLoaded(int isLoaded)
+    {
+        PlayerPrefs.SetInt(GAME_LOADED, isLoaded);
+    }
+    public static int isGameLoaded()
+    {
+        return PlayerPrefs.GetInt(GAME_LOADED);     
+    }
 
 }

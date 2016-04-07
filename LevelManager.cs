@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 public class LevelManager : MonoBehaviour
 {
@@ -19,6 +21,21 @@ public class LevelManager : MonoBehaviour
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
 
+    public bool isLoaded = false;
+
+
+    //SAVE SHIT
+    public SaveObjectsList savedGame;
+    public delegate void SaveDelegate(object sender, EventArgs args);
+    public static event SaveDelegate SaveEvent;
+
+
+    //temp
+    public Brick invisibleBrick;
+    public Brick oneHitBrick;
+    public Brick twoHitBrick;
+    public Brick threeHitBrick;
+    public Brick indestructibleBrick;
 
 
 	[Serializable]
@@ -29,8 +46,124 @@ public class LevelManager : MonoBehaviour
 	}
 	public Bonuses[] bonuses;
 
+
+
+
+
+    void loadBricks()
+    {
+        PlayerPrefsManager.setGameLoaded(0);
+        brickCounterOutput.text = "x " + 0;
+        if (savedGame.savedBricks != null)
+        {
+            foreach (SaveBrick brick in savedGame.savedBricks)
+            {
+                initializeBrick(brick);
+
+            }
+        }
+
+        updateBrickCounter();
+        //Recreate bonusesList
+    }
+
+    void initializeBrick(SaveBrick brick)
+    {
+        Brick newBrick;
+        if (brick.tag == "invisible")
+        {
+            newBrick = Instantiate(invisibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+        }
+        else if (brick.tag == "breakable")
+        {
+            if (brick.maxHit == 3)
+            {
+                newBrick = Instantiate(threeHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+            else if (brick.maxHit == 2)
+            {
+                newBrick = Instantiate(twoHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+            else
+            {
+                newBrick = Instantiate(oneHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+        }
+        else
+        {
+            newBrick = Instantiate(indestructibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+        }
+        newBrick.setMaxHits(brick.maxHit);
+        for (int i = 0; i < brick.timesHit; ++i)
+        {
+            Debug.LogError("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives());
+            newBrick.handleHits();
+        }
+        newBrick.setTimesHit(brick.timesHit);
+        
+    }
+
+    public void FireSaveEvent()
+    {
+        Debug.Log("SAVE EVENT");
+        savedGame.savedBricks = new List<SaveBrick>();
+        //If we have any functions in the event:
+        if (SaveEvent != null)
+        {
+            Debug.Log("ROBIMY");
+            SaveEvent(null, null);
+        }
+        else
+        {
+            Debug.Log("KAPA");
+        }
+    }
+
+    public void SaveData()
+    {
+        string path = Application.persistentDataPath + "/save.binary";
+        if (!Directory.Exists(Application.persistentDataPath))
+            Directory.CreateDirectory(Application.persistentDataPath);
+
+        FireSaveEvent();
+
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        FileStream SaveObjects = File.Create(path);
+
+        formatter.Serialize(SaveObjects, savedGame);
+
+        SaveObjects.Close();
+
+        print("Saved!");
+    }
+
+    public void LoadData()
+    {
+        string path = Application.persistentDataPath + "/save.binary";
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream saveObjects = File.Open(path, FileMode.Open);
+
+        savedGame = (SaveObjectsList)formatter.Deserialize(saveObjects);
+
+        saveObjects.Close();
+
+        print("Loaded");
+    }
+
+
+
+
+
+
+
+
+
+
+
 	void Start ()
 	{
+        savedGame = new SaveObjectsList();
 		random = new System.Random ();
 		if (brickCounterOutput != null) {
 			brickCounterOutput.text = "x " + Brick.bricksCounter;
@@ -42,7 +175,25 @@ public class LevelManager : MonoBehaviour
 			livesSprite.sprite = hearts [lives - 1];
 		}
 		bonusesList = BonusTranslator.convertBonusesToList (bonuses);
+       if (PlayerPrefsManager.isGameLoaded() == 1 && SceneManager.GetActiveScene().buildIndex > 0)
+        {
+            loadGame();  
+        }
 	}
+
+
+
+    void loadGame()
+    {
+        Brick[] bricksInGame = GameObject.FindObjectsOfType<Brick>();
+        foreach (Brick brick in bricksInGame)
+        {
+            brick.destroyBrickOnLoad();
+        }
+        Brick.bricksCounter = 0;
+        LoadData();
+        loadBricks();
+    }
 
 	public bool loseLiveAndCheckEndGame ()
 	{
@@ -66,7 +217,7 @@ public class LevelManager : MonoBehaviour
 		}
 	}
 
-	public void updateBallCounter ()
+	public void updateBrickCounter ()
 	{
 		brickCounterOutput.text = "x " + Brick.bricksCounter;
 	}
@@ -91,6 +242,7 @@ public class LevelManager : MonoBehaviour
 
 	public void startNewGame ()
 	{
+        PlayerPrefsManager.setGameLoaded(0);
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
 		PlayerPrefsManager.setHealthPoints (3);
@@ -114,8 +266,19 @@ public class LevelManager : MonoBehaviour
 
 	}
 
+    public void backToMenu()
+    {
+        Debug.Log("BACK TO MENU");
+        SaveData();
+        Ball.resetBallCounter();
+        Brick.bricksCounter = 0;
+        PlayerPrefsManager.setGameLoaded(1);
+        SceneManager.LoadScene("start");
+    }
+
 	public void loadScene ()
 	{
+        isLoaded = false;
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
         if (PlayerPrefsManager.getHealthPoint() > 0)
@@ -134,9 +297,10 @@ public class LevelManager : MonoBehaviour
 	{
 		brickCounterOutput.text = "x " + Brick.bricksCounter;
 		if (Brick.bricksCounter <= 0) {
-			loadNextLevel ();
+                loadNextLevel();
 		}
 	}
+
 
 	public Rigidbody2D getBonus ()
 	{
@@ -178,4 +342,5 @@ public class LevelManager : MonoBehaviour
     {
         return fingerOfGod;
     }
+
 }

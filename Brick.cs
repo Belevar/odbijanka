@@ -1,10 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+
+[System.Serializable]
 public class Brick : MonoBehaviour
 {
 	public static int bricksCounter = 0;
     public static bool areIndestructible = false;
+
+  
 
 	public Sprite[] sprites;
 	public AudioClip destroySound;
@@ -13,9 +18,8 @@ public class Brick : MonoBehaviour
 	public bool isMoveable;
 	private Sprite orginalSprite;
 
-	private int clipIndex;
 	private int maxHits;
-	private int timesHit;
+    private int timesHit;
 	private LevelManager levelManager;
 	private bool isBreakable;
 	private bool isInvisible;
@@ -26,55 +30,50 @@ public class Brick : MonoBehaviour
 	bool movingRight = true;
 	float xMin;
 	float xMax;
-	
 
-
-	void Update ()
-	{
-//		if (isMoveable) {
-//			if (movingRight) {
-//				transform.position += Vector3.right * speed * Time.deltaTime;
-//			} else {
-//				transform.position += Vector3.left * speed * Time.deltaTime;
-//			}
-//		
-//			float leftEdgeOfFormation = transform.position.x - (0.5f * width);
-//			float rightEdgeOfFormation = transform.position.x + (0.5f * width);
-//			if (leftEdgeOfFormation < xMin) {
-//				movingRight = true;
-//			} else if (rightEdgeOfFormation > xMax) {
-//				movingRight = false;
-//			}
-//		}
-	}
 
 	// Use this for initialization
-	void Start ()
-	{
+
+    void Awake()
+    {
+        //################SAVE######################
+        LevelManager.SaveEvent += SaveBrick;
+        //#########################################
+
         areIndestructible = false;
-		levelManager = FindObjectOfType<LevelManager> ();
-		isInvisible = this.tag == "invisible";
-		setBreakable (this.tag == "breakable" || isInvisible);
-		if (isMoveable) {
-//			float distanceToCamera = transform.position.z - Camera.main.transform.position.z;
-//			Vector3 leftEdge = Camera.main.ViewportToWorldPoint (new Vector3 (0, 0, distanceToCamera));
-//			Vector3 rightEdge = Camera.main.ViewportToWorldPoint (new Vector3 (1, 0, distanceToCamera));
-//			xMax = rightEdge.x;
-//			xMin = leftEdge.x;
-//			GetComponent<Rigidbody2D> ().velocity = Vector2.right * speed;
-		}
-		if (isBreakable || isInvisible) {
-			bricksCounter++;
-			levelManager.updateBallCounter ();
-		}
-		orginalSprite = GetComponent<SpriteRenderer> ().sprite;
-		maxHits = sprites.Length + 1;
-		if (isInvisible) {
-			gameObject.GetComponent<SpriteRenderer> ().enabled = false;
-			maxHits = 2;
-		}
-		timesHit = 0;
-	}
+        levelManager = FindObjectOfType<LevelManager>();
+        isInvisible = this.tag == "invisible";
+        setBreakable(this.tag == "breakable" || isInvisible);
+
+        if (isBreakable || isInvisible)
+        {
+            bricksCounter++;
+            levelManager.updateBrickCounter();
+        }
+        orginalSprite = GetComponent<SpriteRenderer>().sprite;
+        maxHits = sprites.Length + 1;
+        if (isInvisible)
+        {
+            gameObject.GetComponent<SpriteRenderer>().enabled = false;
+            maxHits = 2;
+        }
+        timesHit = 0;
+    }
+
+    public void SaveBrick(object sender, EventArgs args)
+    {
+        SaveBrick brick = new SaveBrick();
+        brick.isInvisible = isInvisible;
+        print("SAVE : MAX HITS = " + maxHits);
+        brick.maxHit = maxHits;
+        brick.PositionX = transform.position.x;
+        brick.PositionY = transform.position.y;
+        print("SAVE : TIMES HITS = " + timesHit);
+        brick.timesHit = timesHit;
+        brick.tag = this.tag;
+        levelManager.savedGame.savedBricks.Add(brick);
+
+    }
 	
 	void loadSprites ()
 	{
@@ -96,14 +95,6 @@ public class Brick : MonoBehaviour
 				AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 				handleHits ();
 			}
-		} else {
-//			if (movingRight) {
-//				GetComponent<Rigidbody2D> ().velocity = Vector2.left * speed;
-//				movingRight = false;
-//			} else {
-//				GetComponent<Rigidbody2D> ().velocity = Vector2.right * speed;
-//				movingRight = true;
-//			}
 		}
 	}
 
@@ -141,16 +132,24 @@ public class Brick : MonoBehaviour
 
 	public void handleHits ()
 	{
-		timesHit += Ball.getDamage ();
+        
+		timesHit++;
+        Debug.LogError("Obrywam" + gameObject + "maxHits==" + maxHits + " timesHits==" + timesHit);
 		if (timesHit == 1 && isInvisible) {
 			setVisible ();
 		}
 		if (timesHit >= maxHits) {
+            Debug.LogError("OBrywam DESTROY");
 			destroyBrick ();
 		} else {
 			loadSprites ();
 		}
 	}
+
+    public int getLives()
+    {
+        return timesHit;
+    }
 
 	void destroyBrick ()
 	{
@@ -159,6 +158,12 @@ public class Brick : MonoBehaviour
 		checkForBonus ();
 		levelManager.brickDestroyed ();
 	}
+
+    public void destroyBrickOnLoad()
+    {
+        bricksCounter--;
+        Destroy(gameObject);
+    }
 
 	void checkForBonus ()
 	{
@@ -183,7 +188,28 @@ public class Brick : MonoBehaviour
        
     }
 
+    public void setMaxHits(int hits)
+    {
+        maxHits = hits;
+    }
+
+    public void setTimesHit(int hits)
+    {
+        timesHit = hits;
+    }
+
+    void OnDestroy()
+    {
+        Debug.LogError("NISZCZE SIE");
+        //delete from serialization
+        //################SAVE######################
+        LevelManager.SaveEvent -= SaveBrick;
+
+        //#########################################
+    }
 }
+
+
 // void setBreakable (bool gac)}
 //{  
 //	bonus Gac = null }
