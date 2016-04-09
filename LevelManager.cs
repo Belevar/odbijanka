@@ -28,9 +28,6 @@ public class LevelManager : MonoBehaviour
     public SaveObjectsList savedGame;
     public delegate void SaveDelegate(object sender, EventArgs args);
     public static event SaveDelegate SaveEvent;
-
-
-    //temp
     public Brick invisibleBrick;
     public Brick oneHitBrick;
     public Brick twoHitBrick;
@@ -46,125 +43,20 @@ public class LevelManager : MonoBehaviour
 	}
 	public Bonuses[] bonuses;
 
-
-
-
-
-    void loadBricks()
+    void Awake()
     {
-        PlayerPrefsManager.setGameLoaded(0);
-        brickCounterOutput.text = "x " + 0;
-        if (savedGame.savedBricks != null)
+        if (SceneManager.GetActiveScene().name == "start" && PlayerPrefsManager.isGameLoaded() == 0)
         {
-            foreach (SaveBrick brick in savedGame.savedBricks)
-            {
-                initializeBrick(brick);
-
-            }
-        }
-
-        updateBrickCounter();
-        //Recreate bonusesList
-    }
-
-    void initializeBrick(SaveBrick brick)
-    {
-        Brick newBrick;
-        if (brick.tag == "invisible")
-        {
-            newBrick = Instantiate(invisibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-        }
-        else if (brick.tag == "breakable")
-        {
-            if (brick.maxHit == 3)
-            {
-                newBrick = Instantiate(threeHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-            }
-            else if (brick.maxHit == 2)
-            {
-                newBrick = Instantiate(twoHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-            }
-            else
-            {
-                newBrick = Instantiate(oneHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-            }
-        }
-        else
-        {
-            newBrick = Instantiate(indestructibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-        }
-        newBrick.setMaxHits(brick.maxHit);
-        for (int i = 0; i < brick.timesHit; ++i)
-        {
-            Debug.LogError("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives());
-            newBrick.handleHits();
-        }
-        newBrick.setTimesHit(brick.timesHit);
-        
-    }
-
-    public void FireSaveEvent()
-    {
-        Debug.Log("SAVE EVENT");
-        savedGame.savedBricks = new List<SaveBrick>();
-        //If we have any functions in the event:
-        if (SaveEvent != null)
-        {
-            Debug.Log("ROBIMY");
-            SaveEvent(null, null);
-        }
-        else
-        {
-            Debug.Log("KAPA");
+            GameObject.Find("resume game").GetComponent<Button>().interactable = false;
         }
     }
-
-    public void SaveData()
-    {
-        string path = Application.persistentDataPath + "/save.binary";
-        if (!Directory.Exists(Application.persistentDataPath))
-            Directory.CreateDirectory(Application.persistentDataPath);
-
-        FireSaveEvent();
-
-        BinaryFormatter formatter = new BinaryFormatter();
-
-        FileStream SaveObjects = File.Create(path);
-
-        formatter.Serialize(SaveObjects, savedGame);
-
-        SaveObjects.Close();
-
-        print("Saved!");
-    }
-
-    public void LoadData()
-    {
-        string path = Application.persistentDataPath + "/save.binary";
-        BinaryFormatter formatter = new BinaryFormatter();
-        FileStream saveObjects = File.Open(path, FileMode.Open);
-
-        savedGame = (SaveObjectsList)formatter.Deserialize(saveObjects);
-
-        saveObjects.Close();
-
-        print("Loaded");
-    }
-
-
-
-
-
-
-
-
-
-
 
 	void Start ()
 	{
         savedGame = new SaveObjectsList();
 		random = new System.Random ();
+
+
 		if (brickCounterOutput != null) {
 			brickCounterOutput.text = "x " + Brick.bricksCounter;
 			pauseMenu.SetActive (false);
@@ -174,11 +66,11 @@ public class LevelManager : MonoBehaviour
 		if (livesSprite != null) {
 			livesSprite.sprite = hearts [lives - 1];
 		}
-		bonusesList = BonusTranslator.convertBonusesToList (bonuses);
        if (PlayerPrefsManager.isGameLoaded() == 1 && SceneManager.GetActiveScene().buildIndex > 0)
         {
             loadGame();  
         }
+       bonusesList = BonusTranslator.convertBonusesToList(bonuses);
 	}
 
 
@@ -192,6 +84,12 @@ public class LevelManager : MonoBehaviour
         }
         Brick.bricksCounter = 0;
         LoadData();
+        for (int i = 0; i < savedGame.bonusesLeft.Count; ++i )
+        {
+            print("Bonus numer " + i);
+            print(" ilosc=" + savedGame.bonusesLeft[i]);
+            bonuses[i].quantity = savedGame.bonusesLeft[i];
+        }
         loadBricks();
     }
 
@@ -202,6 +100,7 @@ public class LevelManager : MonoBehaviour
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
         FindObjectOfType<BonusManager>().resetAllBonuses() ;
 		if (endGame) {
+            PlayerPrefsManager.setGameLoaded(0);
 			loadScene ("LoseScreen");
 		}
 		livesSprite.sprite = hearts [lives - 1];
@@ -268,7 +167,6 @@ public class LevelManager : MonoBehaviour
 
     public void backToMenu()
     {
-        Debug.Log("BACK TO MENU");
         SaveData();
         Ball.resetBallCounter();
         Brick.bricksCounter = 0;
@@ -287,7 +185,6 @@ public class LevelManager : MonoBehaviour
         }
 	}
 
-
 	public bool gameIsPaused ()
 	{
 		return paused;
@@ -301,14 +198,19 @@ public class LevelManager : MonoBehaviour
 		}
 	}
 
-
 	public Rigidbody2D getBonus ()
 	{
 		if (bonusesList.Count > 0) {
 			if (random.Next (0, Brick.bricksCounter + 1) <= bonusesList.Count) {
 				Rigidbody2D bonus = bonusesList.Last ().GetComponent<Rigidbody2D> ();
-				bonusesList.RemoveAt (bonusesList.Count - 1);
-				Debug.Log (bonusesList.Count);
+                for (int i = 0; i < bonuses.Length; ++i)
+                {
+                    if(bonuses[i].bonusType.name == bonus.name)
+                    {
+                        --bonuses[i].quantity;
+                    }
+                }
+                bonusesList.RemoveAt(bonusesList.Count - 1);
 				return bonus;
 			}
 		} 
@@ -343,4 +245,122 @@ public class LevelManager : MonoBehaviour
         return fingerOfGod;
     }
 
+    void loadBricks()
+    {
+        PlayerPrefsManager.setGameLoaded(0);
+        brickCounterOutput.text = "x " + 0;
+        if (savedGame.savedBricks != null)
+        {
+            foreach (SaveBrick brick in savedGame.savedBricks)
+            {
+                initializeBrick(brick);
+
+            }
+        }
+
+        updateBrickCounter();
+        //Recreate bonusesList
+    }
+
+    void initializeBrick(SaveBrick brick)
+    {
+        Brick newBrick;
+        if (brick.tag == "invisible")
+        {
+            newBrick = Instantiate(invisibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+        }
+        else if (brick.tag == "breakable")
+        {
+            if (brick.maxHit == 3)
+            {
+                newBrick = Instantiate(threeHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+            else if (brick.maxHit == 2)
+            {
+                newBrick = Instantiate(twoHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+            else
+            {
+                newBrick = Instantiate(oneHitBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+            }
+        }
+        else
+        {
+            newBrick = Instantiate(indestructibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+        }
+        newBrick.setMaxHits(brick.maxHit);
+        for (int i = 0; i < brick.timesHit; ++i)
+        {
+            Debug.LogError("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives());
+            newBrick.handleHits();
+        }
+        newBrick.setTimesHit(brick.timesHit);
+
+    }
+
+    public void FireSaveEvent()
+    {
+        Debug.Log("SAVE EVENT");
+        savedGame.savedBricks = new List<SaveBrick>();
+        savedGame.bonusesLeft = new List<int>();
+        //If we have any functions in the event:
+        if (SaveEvent != null)
+        {
+            Debug.Log("ROBIMY");
+            SaveEvent(null, null);
+        }
+        else
+        {
+            Debug.Log("KAPA");
+        }
+    }
+
+    public void SaveData()
+    {
+        string path = Application.persistentDataPath + "/save.binary";
+        if (!Directory.Exists(Application.persistentDataPath))
+            Directory.CreateDirectory(Application.persistentDataPath);
+
+
+
+        FireSaveEvent();
+
+        for (int i = 0; i < bonuses.Length; ++i)
+        {
+            savedGame.bonusesLeft.Add(bonuses[i].quantity);
+        }
+
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        FileStream SaveObjects = File.Create(path);
+
+        formatter.Serialize(SaveObjects, savedGame);
+
+        SaveObjects.Close();
+
+        print("Saved!");
+    }
+
+    public void LoadData()
+    {
+        string path = Application.persistentDataPath + "/save.binary";
+        BinaryFormatter formatter = new BinaryFormatter();
+        FileStream saveObjects = File.Open(path, FileMode.Open);
+
+        savedGame = (SaveObjectsList)formatter.Deserialize(saveObjects);
+
+        saveObjects.Close();
+
+        print("Loaded");
+    }
+
+    void OnApplicationFocus(bool focusStatus)
+    {
+        if (SceneManager.GetActiveScene().buildIndex > 0)
+        {
+            Debug.LogError("Lost Focus");
+            SaveData();
+            PlayerPrefsManager.setGameLoaded(1);
+        }
+    }
 }

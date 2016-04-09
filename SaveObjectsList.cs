@@ -8,9 +8,11 @@ using System;
 public class SaveObjectsList {
 
     public List<SaveBrick> savedBricks;
+    public List<int> bonusesLeft;
 
     public SaveObjectsList()
     {
         savedBricks = new List<SaveBrick>();
+        bonusesLeft = new List<int>();
     }
 }
