@@ -98,7 +98,8 @@ public class LevelManager : MonoBehaviour
 		bool endGame = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
-        FindObjectOfType<BonusManager>().resetAllBonuses() ;
+        FindObjectOfType<BonusManager> ().resetAllBonuses() ;
+        cleanSceneAfterDeath();
 		if (endGame) {
             PlayerPrefsManager.setGameLoaded(0);
 			loadScene ("LoseScreen");
@@ -106,6 +107,25 @@ public class LevelManager : MonoBehaviour
 		livesSprite.sprite = hearts [lives - 1];
 		return endGame;
 	}
+
+    public void cleanSceneAfterDeath()
+    {
+        Bonus[] bonusesToDestroy = GameObject.FindObjectsOfType<Bonus>();
+        TimeBonus[] timeBonusesToDestroy = GameObject.FindObjectsOfType<TimeBonus>();
+        Missle[] misslesToDestroy = GameObject.FindObjectsOfType<Missle>();
+        for(int i = 0; i < bonusesToDestroy.Length; ++i)
+        {
+            Destroy(bonusesToDestroy[i].gameObject);
+        }
+        for (int i = 0; i < misslesToDestroy.Length; ++i)
+        {
+            Destroy(misslesToDestroy[i].gameObject);
+        }
+        for (int i = 0; i < timeBonusesToDestroy.Length; ++i)
+        {
+            Destroy(timeBonusesToDestroy[i].gameObject);
+        }
+    }
 
 	public void addLive ()
 	{
@@ -194,7 +214,8 @@ public class LevelManager : MonoBehaviour
 	{
 		brickCounterOutput.text = "x " + Brick.bricksCounter;
 		if (Brick.bricksCounter <= 0) {
-                loadNextLevel();
+            PlayerPrefsManager.setGameLoaded(0);
+            loadNextLevel();
 		}
 	}
 
