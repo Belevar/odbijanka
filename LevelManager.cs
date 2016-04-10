@@ -21,8 +21,6 @@ public class LevelManager : MonoBehaviour
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
 
-    public bool isLoaded = false;
-
 
     //SAVE SHIT
     public SaveObjectsList savedGame;
@@ -72,8 +70,6 @@ public class LevelManager : MonoBehaviour
         }
        bonusesList = BonusTranslator.convertBonusesToList(bonuses);
 	}
-
-
 
     void loadGame()
     {
@@ -196,7 +192,6 @@ public class LevelManager : MonoBehaviour
 
 	public void loadScene ()
 	{
-        isLoaded = false;
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
         if (PlayerPrefsManager.getHealthPoint() > 0)

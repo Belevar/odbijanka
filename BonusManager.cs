@@ -92,17 +92,19 @@ public class BonusManager : MonoBehaviour {
         }
         if (!bonusOfThatTypeIsRegistered)
         {
-            timeBonuses.Add(newBonus, spawn());
+            timeBonuses.Add(newBonus, spawn(newBonus));
             StartCoroutine(bonusTimeCount(newBonus, timeBonuses[newBonus]));
         }
     }
 
-    public Slider spawn()
+    public Slider spawn(TimeBonus newBonus)
     {
         Transform freePosition = NextFreePosition();
         if (freePosition)
         {
             Slider enemy = Instantiate(slider, freePosition.position, Quaternion.identity) as Slider;
+            Image background = enemy.GetComponentInChildren<Image>();
+            background.sprite = newBonus.GetComponent<SpriteRenderer>().sprite;
             if(enemy == null)
             {
                 Debug.Log("Nie stworzyłem go :<");
