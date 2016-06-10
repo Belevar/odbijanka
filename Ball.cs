@@ -106,7 +106,7 @@ public class Ball : MonoBehaviour
 			float distanceToMiddle = this.transform.position.x - posOfCollisionWithPaddle.x;
 			GetComponent<Rigidbody2D> ().velocity = new Vector2 (distanceToMiddle, 1f).normalized * magnitude; 
 		} else {
-			Debug.Log ("Odbicie normalne(czyli w dół)");
+			Debug.Log ("Odbicie normalne(czyli w dół) Fix: na odbijanie od dolnej części paletki");
 		}
 	}
 

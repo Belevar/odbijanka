@@ -198,8 +198,6 @@ public class LevelManager : MonoBehaviour
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
 		SceneManager.LoadScene (name);
-
-
 	}
 
 	public void backToMenu ()
@@ -286,7 +284,6 @@ public class LevelManager : MonoBehaviour
 		if (savedGame.savedBricks != null) {
 			foreach (SaveBrick brick in savedGame.savedBricks) {
 				initializeBrick (brick);
-
 			}
 		}
 
@@ -367,8 +364,18 @@ public class LevelManager : MonoBehaviour
 	void OnApplicationFocus (bool focusStatus)
 	{
 		if (SceneManager.GetActiveScene ().buildIndex > 0) {
-			SaveData ();
 			PlayerPrefsManager.setGameLoaded (1);
+			Debug.Log ("LOST FOCUS - SAVE start");
+			SaveData ();
+		}
+	}
+
+	void OnApplicationPause (bool pauseStatus)
+	{
+		if (SceneManager.GetActiveScene ().buildIndex > 0) {
+			PlayerPrefsManager.setGameLoaded (1);
+			Debug.Log ("ON Application pause - SAVE start");
+			SaveData ();
 		}
 	}
 }
