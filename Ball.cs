@@ -5,31 +5,32 @@ public class Ball : MonoBehaviour
 {
 	private Paddle paddle;
 	private Vector3 paddleToBallVector;
-    private LevelManager levelManager;
-    const int speedChangeCounter = 2;
+	private LevelManager levelManager;
+	const int speedChangeCounter = 2;
 	
-    static private bool hasStarted = false;
+	static private bool hasStarted = false;
 	static private int ballCounter = 0;
 	static private bool isGlued = true;
 	static private bool isSuperBall = false;
-    static private int damage = 1;
-    static private int acctualSpeedChange = 0;
-    static private Vector3 originalPosition = new Vector3();
-    static public bool wallsArePresent = true;
+	static private int damage = 1;
+	static private int acctualSpeedChange = 0;
+	static private Vector3 originalPosition = new Vector3 ();
+	static public bool wallsArePresent = true;
 
-    public Sprite[] sprites;
+	public Sprite[] sprites;
 	static public Vector2 currentSpeed = new Vector2 (2f, 13f);
 
-    public enum BALL_MODE
-    {
-        NORMAL,
-        SUPER
-    };
+	public enum BALL_MODE
+	{
+		NORMAL,
+		SUPER}
+
+	;
 
 	// Use this for initialization
 	void Start ()
 	{
-        levelManager = FindObjectOfType<LevelManager>();
+		levelManager = FindObjectOfType<LevelManager> ();
 		if (ballCounter == 0) {
 			originalPosition = gameObject.transform.position;
 			isGlued = true;
@@ -38,42 +39,37 @@ public class Ball : MonoBehaviour
 		paddle = FindObjectOfType<Paddle> ();
 		paddleToBallVector = this.transform.position - paddle.transform.position;
 		ballCounter += 1;
-//		stickToThePaddle ();
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
 		if (!hasStarted) {
-			if (isGlued && !levelManager.gameIsPaused()) {
-                int distanceBetweenBallandPaddle = moveBallWithPaddle(); //that int only for multiple balls 
+			if (isGlued && !levelManager.gameIsPaused ()) {
+				int distanceBetweenBallandPaddle = moveBallWithPaddle (); //that int only for multiple balls 
 
-                if (Input.GetMouseButtonUp(0) && distanceBetweenBallandPaddle <= 1)
-                { 
+				if (Input.GetMouseButtonUp (0) && distanceBetweenBallandPaddle <= 1) { 
 					startFromThePaddle (paddleToBallVector.x);
 				}
 			}
-		} else if(!wallsArePresent){
-            checkIfLeftPlayspace();
+		} else if (!wallsArePresent) {
+			checkIfLeftPlayspace ();
 		}
 	}
 
-    int moveBallWithPaddle()
-    {
-		Vector3 fingerPos = Input.mousePosition;
-		fingerPos = Camera.main.ScreenToWorldPoint (fingerPos);
+	int moveBallWithPaddle ()
+	{
 		float mousePositionInBlocksY = Input.mousePosition.y / Screen.height * 16;
-		float mousePositionInBlocksX = Input.mousePosition.x / Screen.height * 9;
 		int delta = (int)Mathf.Abs (mousePositionInBlocksY - paddle.transform.position.y);
 		transform.position = paddle.transform.position + paddleToBallVector;
-        return delta;
-    }
+		return delta;
+	}
 
 	public void startFromThePaddle (float input)
 	{
 		Vector2 newVelocity = new Vector2 (input * 2, currentSpeed.y);
 		GetComponent<Rigidbody2D> ().velocity = newVelocity;
-        hasStarted = true;
+		hasStarted = true;
 		isGlued = false;
 	}
 
@@ -90,28 +86,29 @@ public class Ball : MonoBehaviour
 		if (collision.collider.tag == "paddle") {
 			if (isGlued) {
 				stickToThePaddle ();
-            }
-            else
-            {
-                bounceFromPaddle(collision.gameObject.transform.position.x);
-            }
-		} else if(collision.collider.tag == "breakable")
-        {
-            Brick brick = collision.gameObject.GetComponent("Brick") as Brick;
-            brick.handleHits();
-        }
+			} else {
+				bounceFromPaddle (collision.gameObject.transform.position);
+			}
+		} else if (collision.collider.tag == "breakable") {
+			Brick brick = collision.gameObject.GetComponent ("Brick") as Brick;
+			brick.handleHits ();
+		}
 		if (hasStarted) {
 			GetComponent<AudioSource> ().volume = FindObjectOfType<MusicPlayer> ().getVolume ();
 			GetComponent<AudioSource> ().Play ();
 		}
 	}
 
-    void bounceFromPaddle(float posXofPaddle)
-    {
-         float magnitude = GetComponent<Rigidbody2D>().velocity.magnitude;
-         float distanceToMiddle = this.transform.position.x - posXofPaddle;
-         GetComponent<Rigidbody2D>().velocity = new Vector2(distanceToMiddle, 1f).normalized * magnitude; 
-    }
+	void bounceFromPaddle (Vector3 posOfCollisionWithPaddle)
+	{
+		if (posOfCollisionWithPaddle.y < transform.position.y) {
+			float magnitude = GetComponent<Rigidbody2D> ().velocity.magnitude;
+			float distanceToMiddle = this.transform.position.x - posOfCollisionWithPaddle.x;
+			GetComponent<Rigidbody2D> ().velocity = new Vector2 (distanceToMiddle, 1f).normalized * magnitude; 
+		} else {
+			Debug.Log ("Odbicie normalne(czyli w dół)");
+		}
+	}
 
 	public void resetBall ()
 	{
@@ -119,7 +116,7 @@ public class Ball : MonoBehaviour
 		changeBallMode (BALL_MODE.NORMAL);
 		stickToThePaddle ();
 	}
-	
+
 	static public bool superBall ()
 	{
 		return isSuperBall; 
@@ -162,28 +159,24 @@ public class Ball : MonoBehaviour
 
 	public void speedUp ()
 	{
-        if (acctualSpeedChange < speedChangeCounter)
-        {
-            ++acctualSpeedChange;
-            Vector2 speed = GetComponent<Rigidbody2D>().velocity;
-           // speed *= 0.25f;
-            speed *= 1.25f;
-          //  GetComponent<Rigidbody2D>().AddForce(speed, ForceMode2D.Impulse);
-            GetComponent<Rigidbody2D>().velocity = speed;
-        }
+		if (acctualSpeedChange < speedChangeCounter) {
+			++acctualSpeedChange;
+			Vector2 speed = GetComponent<Rigidbody2D> ().velocity;
+			speed *= 1.25f;
+			//  GetComponent<Rigidbody2D>().AddForce(speed, ForceMode2D.Impulse);
+			GetComponent<Rigidbody2D> ().velocity = speed;
+		}
 	}
 
-    public void slowDown()
-    {
-        if (acctualSpeedChange > -speedChangeCounter)
-        {
-            --acctualSpeedChange;
-            Vector2 speed = GetComponent<Rigidbody2D>().velocity;
-            //speed *= 0.75f;
-            speed *= 0.75f;
-            GetComponent<Rigidbody2D>().velocity = speed;
-        }
-    }
+	public void slowDown ()
+	{
+		if (acctualSpeedChange > -speedChangeCounter) {
+			--acctualSpeedChange;
+			Vector2 speed = GetComponent<Rigidbody2D> ().velocity;
+			speed *= 0.75f;
+			GetComponent<Rigidbody2D> ().velocity = speed;
+		}
+	}
 
 	public void duplicateBall ()
 	{
@@ -196,16 +189,13 @@ public class Ball : MonoBehaviour
 		}
 	}
 
-    void checkIfLeftPlayspace()
-    {
-        if (transform.position.x < 0.2f)
-        {
-            transform.position = new Vector3(15.5f, transform.position.y);
-        }
-        else if (transform.position.x > 16.2f)
-        {
-            transform.position = new Vector3(0.5f, transform.position.y);
-        }
-    }
+	void checkIfLeftPlayspace ()
+	{
+		if (transform.position.x < 0.2f) {
+			transform.position = new Vector3 (15.5f, transform.position.y);
+		} else if (transform.position.x > 16.2f) {
+			transform.position = new Vector3 (0.5f, transform.position.y);
+		}
+	}
     
 }
