@@ -7,9 +7,8 @@ using System;
 public class Brick : MonoBehaviour
 {
 	public static int bricksCounter = 0;
-    public static bool areIndestructible = false;
+	public static bool areIndestructible = false;
 
-  
 
 	public Sprite[] sprites;
 	public AudioClip destroySound;
@@ -19,7 +18,7 @@ public class Brick : MonoBehaviour
 	private Sprite orginalSprite;
 
 	private int maxHits;
-    private int timesHit;
+	private int timesHit;
 	private LevelManager levelManager;
 	private bool isBreakable;
 	private bool isInvisible;
@@ -34,47 +33,43 @@ public class Brick : MonoBehaviour
 
 	// Use this for initialization
 
-    void Awake()
-    {
-        //################SAVE######################
-        LevelManager.SaveEvent += SaveBrick;
-        //#########################################
+	void Awake ()
+	{
+		//################SAVE######################
+		LevelManager.SaveEvent += SaveBrick;
+		//#########################################
 
-        areIndestructible = false;
-        levelManager = FindObjectOfType<LevelManager>();
-        isInvisible = this.tag == "invisible";
-        setBreakable(this.tag == "breakable" || isInvisible);
+		areIndestructible = false;
+		levelManager = FindObjectOfType<LevelManager> ();
+		isInvisible = this.tag == "invisible";
+		setBreakable (this.tag == "breakable" || isInvisible);
 
-        if (isBreakable || isInvisible)
-        {
-            bricksCounter++;
-            levelManager.updateBrickCounter();
-        }
-        orginalSprite = GetComponent<SpriteRenderer>().sprite;
-        maxHits = sprites.Length + 1;
-        if (isInvisible)
-        {
-            gameObject.GetComponent<SpriteRenderer>().enabled = false;
-            maxHits = 2;
-        }
-        timesHit = 0;
-    }
+		if (isBreakable || isInvisible) {
+			bricksCounter++;
+			levelManager.updateBrickCounter ();
+		}
+		orginalSprite = GetComponent<SpriteRenderer> ().sprite;
+		maxHits = sprites.Length + 1;
+		if (isInvisible) {
+			gameObject.GetComponent<SpriteRenderer> ().enabled = false;
+			maxHits = 2;
+		}
+		timesHit = 0;
+	}
 
-    public void SaveBrick(object sender, EventArgs args)
-    {
-        SaveBrick brick = new SaveBrick();
-        brick.isInvisible = isInvisible;
-        print("SAVE : MAX HITS = " + maxHits);
-        brick.maxHit = maxHits;
-        brick.PositionX = transform.position.x;
-        brick.PositionY = transform.position.y;
-        print("SAVE : TIMES HITS = " + timesHit);
-        brick.timesHit = timesHit;
-        brick.tag = this.tag;
-        levelManager.savedGame.savedBricks.Add(brick);
+	public void SaveBrick (object sender, EventArgs args)
+	{
+		SaveBrick brick = new SaveBrick ();
+		brick.isInvisible = isInvisible;
+		brick.maxHit = maxHits;
+		brick.PositionX = transform.position.x;
+		brick.PositionY = transform.position.y;
+		brick.timesHit = timesHit;
+		brick.tag = this.tag;
+		levelManager.savedGame.savedBricks.Add (brick);
 
-    }
-	
+	}
+
 	void loadSprites ()
 	{
 		int spriteIndex = timesHit - 1;
@@ -89,10 +84,8 @@ public class Brick : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
-		Debug.LogError ("Collisoin");
-		if (collision.gameObject.tag == "ball" || collision.gameObject.tag == "missle") {
+		if (collision.gameObject.tag == "missle") {
 			if (isBreakable) {
-				AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 				handleHits ();
 			}
 		}
@@ -115,41 +108,66 @@ public class Brick : MonoBehaviour
 
 	public void makeBrickIndestructible ()
 	{
-        if (Ball.superBall() || FindObjectOfType<Paddle>().isShooting())
-        {
-            GetComponent<PolygonCollider2D> ().isTrigger = false;
-        }
+		if (Ball.superBall () || FindObjectOfType<Paddle> ().isShooting ()) {
+			GetComponent<PolygonCollider2D> ().isTrigger = false;
+		}
 		setBreakable (false);
 		GetComponent<SpriteRenderer> ().sprite = indestructibleSprite;
-	}   
+	}
 
 	public void makeBrickIndestructibleEnd ()
 	{
 		setBreakable (true);
 		GetComponent<SpriteRenderer> ().sprite = orginalSprite;
-	}   
+	}
 
 
 	public void handleHits ()
 	{
-        
+		AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		timesHit++;
-        Debug.LogError("Obrywam" + gameObject + "maxHits==" + maxHits + " timesHits==" + timesHit);
 		if (timesHit == 1 && isInvisible) {
 			setVisible ();
 		}
 		if (timesHit >= maxHits) {
-            Debug.LogError("OBrywam DESTROY");
 			destroyBrick ();
 		} else {
+			//Invoke ("spawnBricks", 1f);
 			loadSprites ();
 		}
 	}
 
-    public int getLives()
-    {
-        return timesHit;
-    }
+	public void spawnBricks ()
+	{
+		const float radius = 0.2f;
+		Vector2[] newBricksSpawnPoints = {
+			new Vector2 (2f, 0f),
+			new Vector2 (-2f, 0f),
+			new Vector2 (0f, 0.6f),
+			new Vector2 (0f, -0.6f)
+		};
+
+		foreach (Vector2 pos in newBricksSpawnPoints) {
+			Vector2 spawnPos = transform.position;
+			spawnPos = spawnPos + pos;
+
+			if (spawnPos.x + transform.localScale.x > 16f || spawnPos.x - transform.localScale.x < 0f) {
+				Debug.Log ("Pozycja: " + spawnPos + ": Poza ekranem");
+			} else {
+				if (Physics2D.OverlapCircle (spawnPos, radius)) {
+					Debug.Log ("Pozycja: " + spawnPos + ":FOUND object - ignore this spawn point");
+				} else {
+					Debug.Log ("Pozycja: " + spawnPos + ":CREATE");
+					Instantiate (gameObject, spawnPos, Quaternion.identity);
+				}	
+			}
+		}
+	}
+
+	public int getLives ()
+	{
+		return timesHit;
+	}
 
 	void destroyBrick ()
 	{
@@ -159,11 +177,11 @@ public class Brick : MonoBehaviour
 		levelManager.brickDestroyed ();
 	}
 
-    public void destroyBrickOnLoad()
-    {
-        bricksCounter--;
-        Destroy(gameObject);
-    }
+	public void destroyBrickOnLoad ()
+	{
+		bricksCounter--;
+		Destroy (gameObject);
+	}
 
 	void checkForBonus ()
 	{
@@ -179,38 +197,35 @@ public class Brick : MonoBehaviour
 		isBreakable = breakable;
 	}
 
-    void OnMouseDown()
-    {
-        if (!levelManager.gameIsPaused() && isBreakable && levelManager.isFingerOfGodActive()) 
-        {
-            destroyBrick();
-        }
+	void OnMouseDown ()
+	{
+		if (!levelManager.gameIsPaused () && isBreakable && levelManager.isFingerOfGodActive ()) {
+			destroyBrick ();
+		}
        
-    }
+	}
 
-    public void setMaxHits(int hits)
-    {
-        maxHits = hits;
-    }
+	public void setMaxHits (int hits)
+	{
+		maxHits = hits;
+	}
 
-    public void setTimesHit(int hits)
-    {
-        timesHit = hits;
-    }
+	public void setTimesHit (int hits)
+	{
+		timesHit = hits;
+	}
 
-    void OnDestroy()
-    {
-        Debug.LogError("NISZCZE SIE");
-        //delete from serialization
-        //################SAVE######################
-        LevelManager.SaveEvent -= SaveBrick;
-
-        //#########################################
-    }
+	void OnDestroy ()
+	{
+		//delete from serialization
+		//################SAVE######################
+		LevelManager.SaveEvent -= SaveBrick;
+		//#########################################
+	}
 }
 
 
 // void setBreakable (bool gac)}
-//{  
+//{
 //	bonus Gac = null }
 //:3

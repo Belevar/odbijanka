@@ -15,6 +15,7 @@ public class Ball : MonoBehaviour
     static private int damage = 1;
     static private int acctualSpeedChange = 0;
     static private Vector3 originalPosition = new Vector3();
+    static public bool wallsArePresent = true;
 
     public Sprite[] sprites;
 	static public Vector2 currentSpeed = new Vector2 (2f, 13f);
@@ -52,9 +53,8 @@ public class Ball : MonoBehaviour
 					startFromThePaddle (paddleToBallVector.x);
 				}
 			}
-		} else {
-//			TODO cos z boringLoop trze zrobic
-//			breakBoringLoop ();
+		} else if(!wallsArePresent){
+            checkIfLeftPlayspace();
 		}
 	}
 
@@ -68,20 +68,6 @@ public class Ball : MonoBehaviour
 		transform.position = paddle.transform.position + paddleToBallVector;
         return delta;
     }
-
-	void breakBoringLoop ()
-	{
-		Vector2 temp = GetComponent<Rigidbody2D> ().velocity;
-		if (temp.y < 1.0f && temp.y > 0f) { //To raczej nie powinno tak być
-			Debug.LogError ("Boring Loop? Break IT!");
-			temp.y *= 2.0f;
-			GetComponent<Rigidbody2D> ().velocity = temp;
-		} else if (temp.x < 1.0f && temp.x > 0f) { //To raczej nie powinno tak być
-			Debug.LogError ("Boring Loop? Break IT!");
-			temp.x *= 2.0f;
-			GetComponent<Rigidbody2D> ().velocity = temp;
-		}
-	}
 
 	public void startFromThePaddle (float input)
 	{
@@ -109,7 +95,11 @@ public class Ball : MonoBehaviour
             {
                 bounceFromPaddle(collision.gameObject.transform.position.x);
             }
-		}
+		} else if(collision.collider.tag == "breakable")
+        {
+            Brick brick = collision.gameObject.GetComponent("Brick") as Brick;
+            brick.handleHits();
+        }
 		if (hasStarted) {
 			GetComponent<AudioSource> ().volume = FindObjectOfType<MusicPlayer> ().getVolume ();
 			GetComponent<AudioSource> ().Play ();
@@ -205,5 +195,17 @@ public class Ball : MonoBehaviour
 			Debug.LogError ("Duplicate Ball::Nie bangla");
 		}
 	}
+
+    void checkIfLeftPlayspace()
+    {
+        if (transform.position.x < 0.2f)
+        {
+            transform.position = new Vector3(15.5f, transform.position.y);
+        }
+        else if (transform.position.x > 16.2f)
+        {
+            transform.position = new Vector3(0.5f, transform.position.y);
+        }
+    }
     
 }

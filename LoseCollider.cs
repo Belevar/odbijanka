@@ -17,10 +17,7 @@ public class LoseCollider : MonoBehaviour
 				print ("Wiekszy");
 				trigger.gameObject.GetComponent<Ball> ().destroyBall ();
 			} else {
-				if (!levelManager.loseLiveAndCheckEndGame ()) {
-					FindObjectOfType<Paddle> ().resetPaddle ();
-					FindObjectOfType<Ball> ().resetBall ();
-				}
+				levelManager.loseLiveAndCheckEndGame ();
 			}
 		} else {
 			Destroy (trigger.gameObject);
