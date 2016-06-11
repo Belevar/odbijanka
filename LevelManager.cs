@@ -48,6 +48,8 @@ public class LevelManager : MonoBehaviour
 
 	void Awake ()
 	{
+		Debug.Log (SceneManager.GetActiveScene ().name);
+		Debug.Log (PlayerPrefsManager.isGameLoaded ());
 		if (SceneManager.GetActiveScene ().name == "start" && PlayerPrefsManager.isGameLoaded () == 0) {
 			GameObject.Find ("resume game").GetComponent<Button> ().interactable = false;
 		}
@@ -69,7 +71,7 @@ public class LevelManager : MonoBehaviour
 		if (livesSprite != null) {
 			livesSprite.sprite = hearts [lives - 1];
 		}
-		if (PlayerPrefsManager.isGameLoaded () == 1 && SceneManager.GetActiveScene ().buildIndex > 0) {
+		if (PlayerPrefsManager.isGameLoaded () == 1 && SceneManager.GetActiveScene ().buildIndex > 4) {
 			loadGame ();  
 		}
 		bonusesList = BonusTranslator.convertBonusesToList (bonuses);
@@ -112,9 +114,6 @@ public class LevelManager : MonoBehaviour
 		Debug.Log ("Przed reklamą");
 		adds.ShowRewardedAd ();
 		Debug.Log ("PO reklamie");
-		//while (adds.isShowing ()) {
-		//	Debug.Log ("Wait until add is closed");
-		//}
 	}
 
 	public void checkEndGame ()
@@ -165,10 +164,17 @@ public class LevelManager : MonoBehaviour
 
 	public void loadNextLevel ()
 	{
+		Debug.Log ("loadNEXTLevel start");
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
-		PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
-		SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);
+		if (SceneManager.GetActiveScene ().buildIndex + 1 < SceneManager.sceneCountInBuildSettings) {
+			Debug.Log ("loadNEXTLevel IF current index" + SceneManager.GetActiveScene ().buildIndex);
+			Debug.Log ("loadNEXTLevel IF count scenes" + SceneManager.sceneCountInBuildSettings);
+			PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
+			SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);			
+		} else {
+			SceneManager.LoadScene ("win");
+		}
 	}
 
 	public void quitRequest ()
@@ -184,13 +190,6 @@ public class LevelManager : MonoBehaviour
 		PlayerPrefsManager.setHealthPoints (3);
 		PlayerPrefsManager.setLevel (1);
 		SceneManager.LoadScene ("level_1");
-	}
-
-	IEnumerator Example ()
-	{
-		print (Time.time);
-		yield return new WaitForSeconds (5);
-		print (Time.time);
 	}
 
 	public void loadScene (string name)
@@ -286,9 +285,7 @@ public class LevelManager : MonoBehaviour
 				initializeBrick (brick);
 			}
 		}
-
 		updateBrickCounter ();
-		//Recreate bonusesList
 	}
 
 	void initializeBrick (SaveBrick brick)
@@ -323,7 +320,6 @@ public class LevelManager : MonoBehaviour
 		//If we have any functions in the event:
 		if (SaveEvent != null) {
 			SaveEvent (null, null);
-		} else {
 		}
 	}
 
@@ -363,7 +359,7 @@ public class LevelManager : MonoBehaviour
 
 	void OnApplicationFocus (bool focusStatus)
 	{
-		if (SceneManager.GetActiveScene ().buildIndex > 0) {
+		if (SceneManager.GetActiveScene ().buildIndex > 4) {
 			PlayerPrefsManager.setGameLoaded (1);
 			Debug.Log ("LOST FOCUS - SAVE start");
 			SaveData ();
@@ -372,10 +368,11 @@ public class LevelManager : MonoBehaviour
 
 	void OnApplicationPause (bool pauseStatus)
 	{
-		if (SceneManager.GetActiveScene ().buildIndex > 0) {
+		if (SceneManager.GetActiveScene ().buildIndex > 4) {
 			PlayerPrefsManager.setGameLoaded (1);
 			Debug.Log ("ON Application pause - SAVE start");
 			SaveData ();
 		}
 	}
+
 }
