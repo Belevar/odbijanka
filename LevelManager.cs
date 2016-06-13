@@ -21,6 +21,7 @@ public class LevelManager : MonoBehaviour
 	public Sprite[] hearts;
 	public SpriteRenderer livesSprite;
 	private AdsvertMaker adds;
+	public GameObject loseMesseage;
 
 
 	//SAVE SHIT
@@ -100,19 +101,27 @@ public class LevelManager : MonoBehaviour
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
 		FindObjectOfType<BonusManager> ().resetAllBonuses ();
 		cleanSceneAfterDeath ();
+
 		if (zeroLives) {
-			showAdd ();
-			//checkEndGame ();
+			livesSprite.enabled = false;
+			showLoseMessage ();
 		} else {
 			livesSprite.sprite = hearts [lives - 1];
 		}
 		return zeroLives;
 	}
 
-	private void showAdd ()
+	void showLoseMessage ()
+	{
+		loseMesseage.SetActive (true);
+		pauseGameWithoutPauseMenu ();
+	}
+
+	public void showAdd ()
 	{
 		Debug.Log ("Przed reklamą");
 		adds.ShowRewardedAd ();
+		loseMesseage.SetActive (false);
 		Debug.Log ("PO reklamie");
 	}
 
@@ -148,6 +157,7 @@ public class LevelManager : MonoBehaviour
 		if (lives < maxLives) {
 			++lives;
 			PlayerPrefsManager.setHealthPoints (lives);
+			livesSprite.enabled = true;
 			livesSprite.sprite = hearts [lives - 1];
 		}
 	}
@@ -201,11 +211,13 @@ public class LevelManager : MonoBehaviour
 
 	public void backToMenu ()
 	{
-		SaveData ();
-		Ball.resetBallCounter ();
-		Brick.bricksCounter = 0;
-		PlayerPrefsManager.setGameLoaded (1);
-		SceneManager.LoadScene ("start");
+		if (!loseMesseage.activeSelf) {
+			SaveData ();
+			Ball.resetBallCounter ();
+			Brick.bricksCounter = 0;
+			PlayerPrefsManager.setGameLoaded (1);
+			SceneManager.LoadScene ("start");
+		}
 	}
 
 	public void loadScene ()
@@ -250,14 +262,27 @@ public class LevelManager : MonoBehaviour
 
 	public void pauseGame ()
 	{
+		if (!loseMesseage.activeSelf) {
+			if (paused) {
+				Time.timeScale = 1;
+				paused = false;
+				pauseMenu.SetActive (paused);
+			} else {
+				paused = true;
+				Time.timeScale = 0; 
+				pauseMenu.SetActive (paused);
+			}
+		}
+	}
+
+	public void pauseGameWithoutPauseMenu ()
+	{
 		if (paused) {
 			Time.timeScale = 1;
 			paused = false;
-			pauseMenu.SetActive (paused);
 		} else {
 			paused = true;
 			Time.timeScale = 0; 
-			pauseMenu.SetActive (paused);
 		}
 	}
 

@@ -14,7 +14,6 @@ public class AdsvertMaker : MonoBehaviour
 	public void ShowRewardedAd ()
 	{
 		if (Advertisement.IsReady ()) {
-			levelManger.pauseGame ();
 			var options = new ShowOptions { resultCallback = HandleShowResult };
 			Advertisement.Show ("", options);
 
@@ -39,7 +38,7 @@ public class AdsvertMaker : MonoBehaviour
 			levelManger.checkEndGame ();
 			break;
 		}
-		levelManger.pauseGame ();
+		levelManger.pauseGameWithoutPauseMenu ();
 	}
 
 	public bool isShowing ()
