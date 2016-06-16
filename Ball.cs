@@ -89,10 +89,7 @@ public class Ball : MonoBehaviour
 			} else {
 				bounceFromPaddle (collision.gameObject.transform.position);
 			}
-		} else if (collision.collider.tag == "breakable") {
-			Brick brick = collision.gameObject.GetComponent ("Brick") as Brick;
-			brick.handleHits ();
-		}
+		} 
 		if (hasStarted) {
 			GetComponent<AudioSource> ().volume = FindObjectOfType<MusicPlayer> ().getVolume ();
 			GetComponent<AudioSource> ().Play ();
@@ -191,9 +188,12 @@ public class Ball : MonoBehaviour
 
 	void checkIfLeftPlayspace ()
 	{
+		Debug.Log ("Player left space - value=" + wallsArePresent);
 		if (transform.position.x < 0.2f) {
+			levelManager.brickCounterOutput.text = "Player left space - value=" + wallsArePresent;
 			transform.position = new Vector3 (15.5f, transform.position.y);
 		} else if (transform.position.x > 16.2f) {
+			levelManager.brickCounterOutput.text = "Player left space - value=" + wallsArePresent;
 			transform.position = new Vector3 (0.5f, transform.position.y);
 		}
 	}

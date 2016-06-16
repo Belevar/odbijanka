@@ -129,6 +129,7 @@ public class LevelManager : MonoBehaviour
 	{
 		if (lives <= 0) {
 			PlayerPrefsManager.setGameLoaded (0);
+			pauseGameWithoutPauseMenu ();
 			loadScene ("LoseScreen");
 		}
 	}
