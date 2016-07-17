@@ -98,7 +98,7 @@ public class LevelManager : MonoBehaviour
 	{
 		bool zeroLives = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
-		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
+		//FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
 		FindObjectOfType<BonusManager> ().resetAllBonuses ();
 		cleanSceneAfterDeath ();
 

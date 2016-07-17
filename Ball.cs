@@ -190,10 +190,8 @@ public class Ball : MonoBehaviour
 	{
 		Debug.Log ("Player left space - value=" + wallsArePresent);
 		if (transform.position.x < 0.2f) {
-			levelManager.brickCounterOutput.text = "Player left space - value=" + wallsArePresent;
 			transform.position = new Vector3 (15.5f, transform.position.y);
 		} else if (transform.position.x > 16.2f) {
-			levelManager.brickCounterOutput.text = "Player left space - value=" + wallsArePresent;
 			transform.position = new Vector3 (0.5f, transform.position.y);
 		}
 	}
