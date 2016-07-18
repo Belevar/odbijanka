@@ -10,7 +10,15 @@ public class BonusManager : MonoBehaviour
     
 	public Slider slider;
 
+
+    private LevelManager levelManger;
+
 	Dictionary<TimeBonus, Slider> timeBonuses = new Dictionary<TimeBonus, Slider> ();
+
+    void Start()
+    {
+        levelManger = FindObjectOfType<LevelManager>();
+    }
 
 	IEnumerator bonusTimeCount (TimeBonus currentBonus, Slider slider)
 	{
@@ -19,26 +27,22 @@ public class BonusManager : MonoBehaviour
 		}
 		float bonusDuration = currentBonus.getDuration ();
 		while (slider.value < bonusDuration) {
-			currentBonus.setCurrentTime (Mathf.MoveTowards (currentBonus.getCurrentTime (), bonusDuration, 1f * Time.deltaTime));
-			slider.value = currentBonus.getCurrentTime ();
-            
+            slider.value =  (Mathf.MoveTowards(slider.value, bonusDuration, 1f * Time.deltaTime));
+
 			yield return null;
 		}
-		print ("koniec bonusu");
+        levelManger.brickCounterOutput.text = "koniec bonusu" + currentBonus;
 		currentBonus.disactivate ();
 
 		Vector2 pos = slider.transform.position;
 		pos.y += 75f;
 
-
-		while (Vector3.Distance (slider.transform.position, pos) > 0.15f) {
-			slider.transform.position = Vector3.Lerp (slider.transform.position, pos, 3f * Time.deltaTime);
+		while (Vector3.Distance (slider.transform.position, pos) > 0.5f) {
+            slider.transform.position = new Vector3(slider.transform.position.x, Mathf.MoveTowards( slider.transform.position.y, pos.y, 50f * Time.deltaTime), slider.transform.position.z);
 			yield return null;
 		}
-
-		Slider a = timeBonuses [currentBonus];
 		timeBonuses.Remove (currentBonus);
-		Destroy (a.gameObject);
+		Destroy (slider.gameObject);
 		//moveBonus(); //NOT WORKING AS EXPEXTED
 	}
 
@@ -70,22 +74,20 @@ public class BonusManager : MonoBehaviour
 		foreach (TimeBonus bonus in buffer) {
 			bonus.disactivate ();
 		}
+        StopAllCoroutines();
 	}
 
 	public void registerTimeBonus (TimeBonus newBonus)
 	{
-		bool bonusOfThatTypeIsRegistered = false;
-		var buffer = new List<TimeBonus> (timeBonuses.Keys);
-		foreach (TimeBonus bonus in buffer) {
-			if (bonus.GetType () == newBonus.GetType ()) {
-				bonusOfThatTypeIsRegistered = true;
-				bonus.setCurrentTime (0f);
-			}
-		}
-		if (!bonusOfThatTypeIsRegistered) {
+
+        if(timeBonuses.ContainsKey(newBonus))
+        {
+            timeBonuses[newBonus].value = 0f;
+        }
+		else {
 			timeBonuses.Add (newBonus, spawn (newBonus));
-			StartCoroutine (bonusTimeCount (newBonus, timeBonuses [newBonus]));
-		}
+		    StartCoroutine(bonusTimeCount (newBonus, timeBonuses [newBonus]));
+        }
 	}
 
 	public Slider spawn (TimeBonus newBonus)
@@ -118,7 +120,8 @@ public class BonusManager : MonoBehaviour
 	{
 		var buffer = new List<Slider> (timeBonuses.Values);
 		foreach (Slider slider in buffer) {
-			slider.value = 10f;
+            Destroy(slider.gameObject);
 		}
+        timeBonuses.Clear();
 	}
 }

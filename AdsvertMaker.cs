@@ -11,6 +11,11 @@ public class AdsvertMaker : MonoBehaviour
 		levelManger = GetComponentInParent<LevelManager> ();
 	}
 
+    void Update()
+    {
+
+    }
+
 	public void ShowRewardedAd ()
 	{
 		if (Advertisement.IsReady ()) {
@@ -18,6 +23,7 @@ public class AdsvertMaker : MonoBehaviour
 			Advertisement.Show ("", options);
 
 		} else {
+            levelManger.checkEndGame();
 			Debug.Log ("IS NOT READY");
 		}
 	}
@@ -27,16 +33,23 @@ public class AdsvertMaker : MonoBehaviour
 		switch (result) {
 		case ShowResult.Finished:
 			Debug.Log ("The ad was successfully shown.");
+            levelManger.brickCounterOutput.text = "The ad was successfully shown.";
 			levelManger.addLive ();
 			break;
 		case ShowResult.Skipped:
 			Debug.Log ("The ad was skipped before reaching the end.");
-			levelManger.checkEndGame ();
+            levelManger.brickCounterOutput.text = "The ad was skipped before reaching the end.";
+            levelManger.checkEndGame ();
 			break;
 		case ShowResult.Failed:
 			Debug.LogError ("The ad failed to be shown.");
+            levelManger.brickCounterOutput.text = "The ad failed to be shown.";
 			levelManger.checkEndGame ();
 			break;
+        default:
+            levelManger.brickCounterOutput.text = "Defff.";
+            levelManger.checkEndGame();
+        break;   
 		}
 		levelManger.pauseGameWithoutPauseMenu ();
 	}

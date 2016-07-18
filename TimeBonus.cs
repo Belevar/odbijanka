@@ -23,4 +23,16 @@ public abstract class TimeBonus : MonoBehaviour
     {
         return duration;
     }
+
+    public override int GetHashCode()
+    {
+        return gameObject.name.GetHashCode();
+    }
+
+    public override bool Equals(object o)
+    {
+        TimeBonus timeBonus = o as TimeBonus;
+        return gameObject.name == timeBonus.gameObject.name;
+    }
+
 }
