@@ -14,7 +14,7 @@ public class Brick : MonoBehaviour
 	public AudioClip destroySound;
 	public Rigidbody2D bonus;
 	public Sprite indestructibleSprite;
-	public bool isMoveable;
+    public bool isExploding = false;
 	private Sprite orginalSprite;
 
 	private int maxHits;
@@ -26,7 +26,6 @@ public class Brick : MonoBehaviour
 	public float width = 0.9f;
 	public float height = 5f;
 	public float speed = 5f;
-	bool movingRight = true;
 	float xMin;
 	float xMax;
 
@@ -169,13 +168,40 @@ public class Brick : MonoBehaviour
 		return timesHit;
 	}
 
-	void destroyBrick ()
+	public void destroyBrick ()
 	{
+        if(isExploding)
+        {
+            explode();
+        }
 		bricksCounter--;
 		Destroy (gameObject);
 		checkForBonus ();
 		levelManager.brickDestroyed ();
 	}
+
+    void explode()
+    {
+        float explosionRadius = 0.5f;
+        Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+        Debug.Log("EXPOLDE " + objectsInRange.Length + " pos=" + transform.position);
+        foreach (Collider2D col in objectsInRange)
+        {
+            Debug.Log("FOR EXPOLDE");
+            Brick brick = col.GetComponent<Brick>();
+            if (brick != null && brick.transform.position != transform.position)
+            {
+                brick.destroyBrick();
+            }
+            else
+            {
+                Debug.Log("EXPOLDE ELSE");
+            }
+        }
+
+
+    }
+
 
 	public void destroyBrickOnLoad ()
 	{
