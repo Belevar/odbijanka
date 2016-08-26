@@ -17,6 +17,7 @@ public class Ball : MonoBehaviour
 	static private Vector3 originalPosition = new Vector3 ();
 	static public bool wallsArePresent = true;
 
+	public AudioClip superBallSound;
 	public Sprite[] sprites;
 	static public Vector2 currentSpeed = new Vector2 (2f, 13f);
 
@@ -91,8 +92,17 @@ public class Ball : MonoBehaviour
 			}
 		} 
 		if (hasStarted) {
-			GetComponent<AudioSource> ().volume = FindObjectOfType<MusicPlayer> ().getVolume ();
-			GetComponent<AudioSource> ().Play ();
+            Brick hitedBrick = collision.gameObject.GetComponent<Brick>();
+            Debug.Log(hitedBrick);
+            if(hitedBrick != null)
+            {
+				GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();
+				GetComponent<AudioSource>().PlayOneShot(collision.gameObject.GetComponent<Brick>().getHitSound());
+            } else
+            {
+                GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();
+                GetComponent<AudioSource> ().Play ();
+            }
 		}
 	}
 
@@ -117,6 +127,12 @@ public class Ball : MonoBehaviour
 	static public bool superBall ()
 	{
 		return isSuperBall; 
+	}
+
+	public void playSuperBallSound()
+	{
+		GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();
+		GetComponent<AudioSource>().PlayOneShot(superBallSound);
 	}
 
 	static public int getBallCounter ()

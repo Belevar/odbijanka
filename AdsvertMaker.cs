@@ -13,19 +13,30 @@ public class AdsvertMaker : MonoBehaviour
 
     void Update()
     {
-
+        Advertisement.IsReady();
     }
 
 	public void ShowRewardedAd ()
 	{
-		if (Advertisement.IsReady ()) {
-			var options = new ShowOptions { resultCallback = HandleShowResult };
+		while (!Advertisement.IsReady ()) {
+			Debug.Log("IS NOT READY");
+            
+		} 
+           var options = new ShowOptions { resultCallback = HandleShowResult };
 			Advertisement.Show ("", options);
 
-		} else {
-            levelManger.checkEndGame();
-			Debug.Log ("IS NOT READY");
-		}
+            /* Advertisement.Initialize("1079174");
+            if (Advertisement.IsReady())
+            {
+                var options = new ShowOptions { resultCallback = HandleShowResult };
+                Advertisement.Show("", options);
+
+            }
+            else
+            {
+                levelManger.checkEndGame();*/
+//                Debug.Log("IS NOT READY");
+        
 	}
 
 	private void HandleShowResult (ShowResult result)

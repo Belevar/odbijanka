@@ -14,6 +14,7 @@ public class BonusManager : MonoBehaviour
     private LevelManager levelManger;
 
 	Dictionary<TimeBonus, Slider> timeBonuses = new Dictionary<TimeBonus, Slider> ();
+    List<Slider> releasedBonuses = new List<Slider>();
 
     void Start()
     {
@@ -26,14 +27,17 @@ public class BonusManager : MonoBehaviour
 			Debug.Log ("Panie ni ma slajdera");
 		}
 		float bonusDuration = currentBonus.getDuration ();
+
 		while (slider.value < bonusDuration) {
             slider.value =  (Mathf.MoveTowards(slider.value, bonusDuration, 1f * Time.deltaTime));
-
 			yield return null;
 		}
+
         levelManger.brickCounterOutput.text = "koniec bonusu" + currentBonus;
 		currentBonus.disactivate ();
-
+        timeBonuses.Remove(currentBonus);
+        releasedBonuses.Add(slider);
+        slider.transform.SetParent(GameObject.Find("Buttons_and_bonuses").transform);
 		Vector2 pos = slider.transform.position;
 		pos.y += 75f;
 
@@ -41,8 +45,9 @@ public class BonusManager : MonoBehaviour
             slider.transform.position = new Vector3(slider.transform.position.x, Mathf.MoveTowards( slider.transform.position.y, pos.y, 50f * Time.deltaTime), slider.transform.position.z);
 			yield return null;
 		}
-		timeBonuses.Remove (currentBonus);
+        
 		Destroy (slider.gameObject);
+        releasedBonuses.Remove(slider);
 		//moveBonus(); //NOT WORKING AS EXPEXTED
 	}
 
@@ -74,6 +79,7 @@ public class BonusManager : MonoBehaviour
 		foreach (TimeBonus bonus in buffer) {
 			bonus.disactivate ();
 		}
+        
         StopAllCoroutines();
 	}
 
@@ -97,6 +103,9 @@ public class BonusManager : MonoBehaviour
 			Slider enemy = Instantiate (slider, freePosition.position, Quaternion.identity) as Slider;
 			Image background = enemy.GetComponentInChildren<Image> ();
 			background.sprite = newBonus.GetComponent<SpriteRenderer> ().sprite;
+			background.SetNativeSize();
+			background.transform.localScale = new Vector3(0.45f,0.45f,1f);
+
 			if (enemy == null) {
 				Debug.Log ("Nie stworzyłem go :<");
 			}
@@ -122,6 +131,15 @@ public class BonusManager : MonoBehaviour
 		foreach (Slider slider in buffer) {
             Destroy(slider.gameObject);
 		}
+        Debug.Log("RESET BONUSES");
+       // var releasedBonusSliders = GetComponentsInChildren<Slider>(GameObject.Find("Buttons_and_bonuses").transform);
+       // Debug.Log(releasedBonusSliders.Length);
+        foreach (Slider slider in releasedBonuses)
+        {
+            Debug.Log("RESET BONUSES for");
+            Destroy(slider.gameObject);
+        }
+        releasedBonuses.Clear();
         timeBonuses.Clear();
 	}
 }

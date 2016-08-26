@@ -11,7 +11,8 @@ public class Brick : MonoBehaviour
 
 
 	public Sprite[] sprites;
-	public AudioClip destroySound;
+	public AudioClip hitSound;
+    public AudioClip indestructibleHitSound;
 	public Rigidbody2D bonus;
 	public Sprite indestructibleSprite;
     public bool isExploding = false;
@@ -21,7 +22,9 @@ public class Brick : MonoBehaviour
 	private int timesHit;
 	private LevelManager levelManager;
 	private bool isBreakable;
+    public bool IsBreakable { get{ return isBreakable;}}
 	private bool isInvisible;
+    public bool IsInvisible { get { return isInvisible; } }
 
 	public float width = 0.9f;
 	public float height = 5f;
@@ -93,7 +96,9 @@ public class Brick : MonoBehaviour
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
 		if (trigger.gameObject.tag == "ball") {
+			Ball ball = trigger.gameObject.GetComponent<Ball>();
 			if (isBreakable) {
+				ball.playSuperBallSound();
 				destroyBrick ();
 			}
 		} 
@@ -103,6 +108,8 @@ public class Brick : MonoBehaviour
 	{
 		timesHit = 1;
 		gameObject.GetComponent<SpriteRenderer> ().enabled = true;
+        isInvisible = false;
+        tag = "breakable";//this might cause error when saving/loading bricks
 	}
 
 	public void makeBrickIndestructible ()
@@ -123,7 +130,7 @@ public class Brick : MonoBehaviour
 
 	public void handleHits ()
 	{
-		AudioSource.PlayClipAtPoint (destroySound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
+		//AudioSource.PlayClipAtPoint (hitSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		timesHit++;
 		if (timesHit == 1 && isInvisible) {
 			setVisible ();
@@ -131,7 +138,7 @@ public class Brick : MonoBehaviour
 		if (timesHit >= maxHits) {
 			destroyBrick ();
 		} else {
-			//Invoke ("spawnBricks", 1f);
+			//Invoke ("spawnBricks", 1f);// creating new bricks
 			loadSprites ();
 		}
 	}
@@ -182,7 +189,8 @@ public class Brick : MonoBehaviour
 
     void explode()
     {
-        float explosionRadius = 0.5f;
+        float explosionRadius = 1;
+		isExploding = false;
         Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         Debug.Log("EXPOLDE " + objectsInRange.Length + " pos=" + transform.position);
         foreach (Collider2D col in objectsInRange)
@@ -240,6 +248,19 @@ public class Brick : MonoBehaviour
 	{
 		timesHit = hits;
 	}
+
+    public AudioClip getHitSound()
+    {
+		if(isBreakable)
+		{
+			Debug.Log("Normal sound");
+			return hitSound;// : indestructibleHitSound;
+		} else
+		{
+			Debug.Log("Indestruddasdasdsa");
+			return indestructibleHitSound;
+		}
+    }
 
 	void OnDestroy ()
 	{

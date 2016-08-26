@@ -5,10 +5,10 @@ public class Bonus_SuperBall : TimeBonus
 {
 	
 	public AudioClip bonusSound;
-	
+	public float bonusSoundMultiplayer = 1.2f;
 	override public	void activateBonus ()
 	{
-		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
+		AudioSource.PlayClipAtPoint (bonusSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ()+ bonusSoundMultiplayer);
 		GameObject[] bricksInGame = GameObject.FindGameObjectsWithTag ("breakable");
         if (!Brick.areIndestructible)
         {
