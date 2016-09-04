@@ -36,6 +36,8 @@ public class LevelManager : MonoBehaviour
 	public Brick twoHitBrick;
 	public Brick threeHitBrick;
 	public Brick indestructibleBrick;
+    public Brick builderBrick;
+    public Brick explodingBrick;
 
 
 	[Serializable]
@@ -136,8 +138,8 @@ public class LevelManager : MonoBehaviour
 
 	public void cleanSceneAfterDeath ()
 	{
-		FindObjectOfType<Paddle> ().resetPaddle ();
-		FindObjectOfType<Ball> ().resetBall ();
+        StartCoroutine(waitForRessurect());
+       // paused = true;
 		Bonus[] bonusesToDestroy = GameObject.FindObjectsOfType<Bonus> ();
 		TimeBonus[] timeBonusesToDestroy = GameObject.FindObjectsOfType<TimeBonus> ();
 		Missle[] misslesToDestroy = GameObject.FindObjectsOfType<Missle> ();
@@ -150,6 +152,9 @@ public class LevelManager : MonoBehaviour
 		for (int i = 0; i < timeBonusesToDestroy.Length; ++i) {
 			Destroy (timeBonusesToDestroy [i].gameObject);
 		}
+        FindObjectOfType<Paddle>().resetPaddle();
+        FindObjectOfType<Ball>().resetBall();
+       // paused = false;
 	}
 
 	public void addLive ()
@@ -316,7 +321,33 @@ public class LevelManager : MonoBehaviour
 
 	void initializeBrick (SaveBrick brick)
 	{
-		Brick newBrick;
+		Brick newBrick = null;
+
+        switch (brick.brickType)
+        {
+            case Brick.BRICK_TYPE.INVISIBLE:
+                newBrick = Instantiate(invisibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.INDESTRUCTIBLE:
+                newBrick = Instantiate(indestructibleBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.NORMAL_1_HIT:
+                newBrick = Instantiate (oneHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.NORMAL_2_HIT:
+                newBrick = Instantiate (twoHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.NORMAL_3_HIT:
+                newBrick = Instantiate (threeHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.BUILDER:
+                newBrick = Instantiate(builderBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+            case Brick.BRICK_TYPE.EXPLODING:
+                newBrick = Instantiate(explodingBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
+                break;
+        }
+        /*
 		if (brick.tag == "invisible") {
 			newBrick = Instantiate (invisibleBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
 		} else if (brick.tag == "breakable") {
@@ -329,7 +360,7 @@ public class LevelManager : MonoBehaviour
 			}
 		} else {
 			newBrick = Instantiate (indestructibleBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-		}
+		}*/
 		newBrick.setMaxHits (brick.maxHit);
 		for (int i = 0; i < brick.timesHit; ++i) {
 			Debug.LogError ("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives ());
@@ -400,5 +431,14 @@ public class LevelManager : MonoBehaviour
 			SaveData ();
 		}
 	}
+
+    IEnumerator waitForRessurect()
+    {
+        paused = true;
+        print(Time.time);
+        yield return new WaitForSeconds(2);
+        print(Time.time);
+        paused = false;
+    }
 
 }

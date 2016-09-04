@@ -26,12 +26,24 @@ public class Brick : MonoBehaviour
 	private bool isInvisible;
     public bool IsInvisible { get { return isInvisible; } }
 
+    private BRICK_TYPE brickType;
+
 	public float width = 0.9f;
 	public float height = 5f;
 	public float speed = 5f;
 	float xMin;
 	float xMax;
 
+    public enum BRICK_TYPE
+    {
+        INVISIBLE,
+        EXPLODING,
+        BUILDER,
+        INDESTRUCTIBLE,
+        NORMAL_1_HIT,
+        NORMAL_2_HIT,
+        NORMAL_3_HIT
+    }
 
 	// Use this for initialization
 
@@ -57,6 +69,7 @@ public class Brick : MonoBehaviour
 			maxHits = 2;
 		}
 		timesHit = 0;
+        assignCorrectBrickType();
 	}
 
 	public void SaveBrick (object sender, EventArgs args)
@@ -68,6 +81,7 @@ public class Brick : MonoBehaviour
 		brick.PositionY = transform.position.y;
 		brick.timesHit = timesHit;
 		brick.tag = this.tag;
+        brick.brickType = brickType;
 		levelManager.savedGame.savedBricks.Add (brick);
 
 	}
@@ -123,6 +137,10 @@ public class Brick : MonoBehaviour
 
 	public void makeBrickIndestructibleEnd ()
 	{
+        if (Ball.superBall() )//|| FindObjectOfType<Paddle>().isShooting())
+        {
+            GetComponent<PolygonCollider2D>().isTrigger = true;
+        }
 		setBreakable (true);
 		GetComponent<SpriteRenderer> ().sprite = orginalSprite;
 	}
@@ -177,18 +195,22 @@ public class Brick : MonoBehaviour
 
 	public void destroyBrick ()
 	{
-        if(isExploding)
+        Destroy(gameObject);
+        if (isExploding)
         {
             explode();
         }
-		bricksCounter--;
-		Destroy (gameObject);
+        else
+        {
+            bricksCounter--;
+        }
 		checkForBonus ();
 		levelManager.brickDestroyed ();
 	}
 
     void explode()
     {
+        bricksCounter--;
         float explosionRadius = 1;
 		isExploding = false;
         Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
@@ -199,7 +221,7 @@ public class Brick : MonoBehaviour
             Brick brick = col.GetComponent<Brick>();
             if (brick != null && brick.transform.position != transform.position)
             {
-                brick.destroyBrick();
+                brick.Invoke("destroyBrick", 0.05f);
             }
             else
             {
@@ -269,6 +291,27 @@ public class Brick : MonoBehaviour
 		LevelManager.SaveEvent -= SaveBrick;
 		//#########################################
 	}
+
+    void assignCorrectBrickType()
+    {
+        if(isExploding)
+        {
+            brickType = BRICK_TYPE.EXPLODING;
+        } else if (isInvisible)
+        {
+            brickType = BRICK_TYPE.INVISIBLE;
+        } else if(!IsBreakable)
+        {
+            brickType = BRICK_TYPE.INDESTRUCTIBLE;
+        } else if (maxHits == 3){
+            brickType = BRICK_TYPE.NORMAL_3_HIT;
+        } else if (maxHits == 2){
+            brickType = BRICK_TYPE.NORMAL_2_HIT;
+        } else if (maxHits == 1){
+            brickType = BRICK_TYPE.NORMAL_1_HIT;
+        }
+        Debug.Log(brickType);
+    }
 }
 
 

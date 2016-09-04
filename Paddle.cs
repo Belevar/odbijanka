@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class Paddle : MonoBehaviour
 {
@@ -83,12 +84,15 @@ public class Paddle : MonoBehaviour
 
 	public void resetPaddle ()
 	{
+
 		this.transform.position = originalPosition;
 		oldMouseX = originalPosition.x;
 		gameObject.transform.localScale = originalSize;
 		disactivateShooting ();
 		indexOfCurrentSize = 2;
 		sizeInX = gameObject.GetComponent<BoxCollider2D> ().bounds.size.x;
+        GetComponent<Animator>().Play("FadeIn");
+     
 	}
 
 	public Vector3 getPosition ()

@@ -11,4 +11,5 @@ public class SaveBrick{
     public int timesHit;
     public int maxHit;
     public bool isInvisible;
+    public Brick.BRICK_TYPE brickType;
 }

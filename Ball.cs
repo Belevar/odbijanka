@@ -122,6 +122,7 @@ public class Ball : MonoBehaviour
 		gameObject.transform.position = originalPosition;
 		changeBallMode (BALL_MODE.NORMAL);
 		stickToThePaddle ();
+        GetComponent<Animator>().Play("FadeIn");
 	}
 
 	static public bool superBall ()
@@ -154,10 +155,17 @@ public class Ball : MonoBehaviour
 		} else if (mode == BALL_MODE.NORMAL) {
 			isSuperBall = false;
 			GetComponent<SpriteRenderer> ().sprite = sprites [0];
-			GameObject[] bricksInGame = GameObject.FindGameObjectsWithTag ("breakable");
-			foreach (GameObject brick in bricksInGame) {
-				brick.GetComponent<PolygonCollider2D> ().isTrigger = false;
-			}
+           
+            //this code should be in the disactivate bonus...s
+            Brick[] bricksInGame = FindObjectsOfType<Brick>();
+                foreach (Brick brick in bricksInGame)
+                {
+                    if (brick.tag == "breakable" || brick.tag == "invisible")
+                    {
+                        brick.GetComponent<PolygonCollider2D>().isTrigger = false;
+                    }
+                }
+            
 		}
 	}
 

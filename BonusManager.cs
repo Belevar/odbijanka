@@ -10,7 +10,7 @@ public class BonusManager : MonoBehaviour
     
 	public Slider slider;
 
-
+    public Vector3 sizeOfBonusSprite;
     private LevelManager levelManger;
 
 	Dictionary<TimeBonus, Slider> timeBonuses = new Dictionary<TimeBonus, Slider> ();
@@ -104,8 +104,9 @@ public class BonusManager : MonoBehaviour
 			Image background = enemy.GetComponentInChildren<Image> ();
 			background.sprite = newBonus.GetComponent<SpriteRenderer> ().sprite;
 			background.SetNativeSize();
+            
 			background.transform.localScale = new Vector3(0.45f,0.45f,1f);
-
+            background.rectTransform.sizeDelta = sizeOfBonusSprite;
 			if (enemy == null) {
 				Debug.Log ("Nie stworzyłem go :<");
 			}
