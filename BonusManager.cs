@@ -33,7 +33,6 @@ public class BonusManager : MonoBehaviour
 			yield return null;
 		}
 
-        levelManger.brickCounterOutput.text = "koniec bonusu" + currentBonus;
 		currentBonus.disactivate ();
         timeBonuses.Remove(currentBonus);
         releasedBonuses.Add(slider);

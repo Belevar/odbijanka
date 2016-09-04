@@ -25,6 +25,7 @@ public class Brick : MonoBehaviour
     public bool IsBreakable { get{ return isBreakable;}}
 	private bool isInvisible;
     public bool IsInvisible { get { return isInvisible; } }
+    private bool exploded = false;
 
     private BRICK_TYPE brickType;
 
@@ -195,43 +196,50 @@ public class Brick : MonoBehaviour
 
 	public void destroyBrick ()
 	{
-        Destroy(gameObject);
-        if (isExploding)
+        
+        if (isExploding && !exploded)
         {
+            Destroy(gameObject);
             explode();
+            checkForBonus();
+            levelManager.brickDestroyed();
         }
-        else
+        else if(!isExploding)
         {
-            bricksCounter--;
+            Destroy(gameObject);
+            if(isBreakable)
+            {
+                bricksCounter--;
+                checkForBonus();
+                levelManager.brickDestroyed();
+            }
+            
         }
-		checkForBonus ();
-		levelManager.brickDestroyed ();
 	}
 
     void explode()
     {
         bricksCounter--;
         float explosionRadius = 1;
-		isExploding = false;
+        exploded = true;
         Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
-        Debug.Log("EXPOLDE " + objectsInRange.Length + " pos=" + transform.position);
+        AudioSource.PlayClipAtPoint(getHitSound(), transform.position, FindObjectOfType<MusicPlayer>().getVolume()); // something is wrong here
         foreach (Collider2D col in objectsInRange)
         {
-            Debug.Log("FOR EXPOLDE");
             Brick brick = col.GetComponent<Brick>();
-            if (brick != null && brick.transform.position != transform.position)
+            if (brick != null && brick.transform.position != transform.position && !brick.wasExploded())
             {
                 brick.Invoke("destroyBrick", 0.05f);
-            }
-            else
-            {
-                Debug.Log("EXPOLDE ELSE");
             }
         }
 
 
     }
 
+    public bool wasExploded()
+    {
+        return exploded;
+    }
 
 	public void destroyBrickOnLoad ()
 	{
