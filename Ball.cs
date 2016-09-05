@@ -96,8 +96,11 @@ public class Ball : MonoBehaviour
             Debug.Log(hitedBrick);
             if(hitedBrick != null)
             {
-				GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();
-				GetComponent<AudioSource>().PlayOneShot(collision.gameObject.GetComponent<Brick>().getHitSound());
+                if (!hitedBrick.isExploding)
+                {
+                    GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();
+                    GetComponent<AudioSource>().PlayOneShot(collision.gameObject.GetComponent<Brick>().getHitSound());
+                }
             } else
             {
                 GetComponent<AudioSource>().volume = FindObjectOfType<MusicPlayer>().getVolume();

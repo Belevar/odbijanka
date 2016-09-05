@@ -22,6 +22,7 @@ public class LevelManager : MonoBehaviour
 	public SpriteRenderer livesSprite;
 	private AdsvertMaker adds;
 	public GameObject loseMesseage;
+    public AudioClip loseSound;
 
 
 	//SAVE SHIT
@@ -98,6 +99,7 @@ public class LevelManager : MonoBehaviour
 
 	public bool loseLiveAndCheckEndGame ()
 	{
+        AudioSource.PlayClipAtPoint(loseSound, transform.position, FindObjectOfType<MusicPlayer>().getVolume());
 		bool zeroLives = --lives <= 0;
 		PlayerPrefsManager.setHealthPoints (lives);
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();

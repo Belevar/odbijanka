@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
+using System.Collections;
 using UnityEngine.Advertisements;
+
 
 public class AdsvertMaker : MonoBehaviour
 {
@@ -9,6 +11,7 @@ public class AdsvertMaker : MonoBehaviour
 	void Start ()
 	{
 		levelManger = GetComponentInParent<LevelManager> ();
+        StartCoroutine(checkInternetConnection());
 	}
 
     void Update()
@@ -18,14 +21,6 @@ public class AdsvertMaker : MonoBehaviour
 
 	public void ShowRewardedAd ()
 	{
-		while (!Advertisement.IsReady ()) {
-			Debug.Log("IS NOT READY");
-            
-		} 
-           var options = new ShowOptions { resultCallback = HandleShowResult };
-			Advertisement.Show ("", options);
-
-            /* Advertisement.Initialize("1079174");
             if (Advertisement.IsReady())
             {
                 var options = new ShowOptions { resultCallback = HandleShowResult };
@@ -34,9 +29,9 @@ public class AdsvertMaker : MonoBehaviour
             }
             else
             {
-                levelManger.checkEndGame();*/
-//                Debug.Log("IS NOT READY");
-        
+                levelManger.checkEndGame();
+            }
+
 	}
 
 	private void HandleShowResult (ShowResult result)
@@ -69,4 +64,38 @@ public class AdsvertMaker : MonoBehaviour
 	{
 		return Advertisement.isShowing;
 	}
+
+
+    private string androidGameID = "1079174";
+
+    private bool unityAdsInitialized = false;//can be used for informing the user about the status
+
+    public IEnumerator checkInternetConnection()
+    {
+        float timeCheck = 1.0f;//will check google.com every two seconds
+        float t1;
+        float t2;
+        Debug.Log("Start corutine");
+        while (!unityAdsInitialized)
+        {
+            WWW www = new WWW("http://google.com");
+            t1 = Time.fixedTime;
+            yield return www;
+            Debug.Log("Ni ma INTERNETÓW");
+            if (www.error == null)
+            {
+                Debug.Log("Znalazłem internety");
+                Advertisement.Initialize(androidGameID); // initialize Unity Ads.
+
+                unityAdsInitialized = true;
+
+                break;//will end the coroutine
+            }
+            t2 = Time.fixedTime - t1;
+            if (t2 < timeCheck)
+                yield return new WaitForSeconds(timeCheck - t2);
+        }
+    }
+
+
 }
