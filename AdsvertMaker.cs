@@ -16,15 +16,15 @@ public class AdsvertMaker : MonoBehaviour
 
     void Update()
     {
-        Advertisement.IsReady();
+        //Advertisement.IsReady("rewardedVideoZone");
     }
 
 	public void ShowRewardedAd ()
 	{
-            if (Advertisement.IsReady())
+        if (Advertisement.IsReady("rewardedVideo"))
             {
                 var options = new ShowOptions { resultCallback = HandleShowResult };
-                Advertisement.Show("", options);
+                Advertisement.Show("rewardedVideo", options);
 
             }
             else
@@ -39,21 +39,17 @@ public class AdsvertMaker : MonoBehaviour
 		switch (result) {
 		case ShowResult.Finished:
 			Debug.Log ("The ad was successfully shown.");
-            levelManger.brickCounterOutput.text = "The ad was successfully shown.";
 			levelManger.addLive ();
 			break;
 		case ShowResult.Skipped:
 			Debug.Log ("The ad was skipped before reaching the end.");
-            levelManger.brickCounterOutput.text = "The ad was skipped before reaching the end.";
             levelManger.checkEndGame ();
 			break;
 		case ShowResult.Failed:
 			Debug.LogError ("The ad failed to be shown.");
-            levelManger.brickCounterOutput.text = "The ad failed to be shown.";
 			levelManger.checkEndGame ();
 			break;
         default:
-            levelManger.brickCounterOutput.text = "Defff.";
             levelManger.checkEndGame();
         break;   
 		}
