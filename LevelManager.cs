@@ -50,6 +50,12 @@ public class LevelManager : MonoBehaviour
 
 	public Bonuses[] bonuses;
 
+    public enum PAUSE_GAME
+    {
+        PAUSE,
+        UNPAUSE
+    }
+
 	void Awake ()
 	{
 		Debug.Log (SceneManager.GetActiveScene ().name);
@@ -118,7 +124,7 @@ public class LevelManager : MonoBehaviour
 	void showLoseMessage ()
 	{
 		loseMesseage.SetActive (true);
-		pauseGameWithoutPauseMenu ();
+		pauseGameWithoutPauseMenu (PAUSE_GAME.PAUSE);
 	}
 
 	public void showAdd ()
@@ -133,7 +139,7 @@ public class LevelManager : MonoBehaviour
 	{
 		if (lives <= 0) {
 			PlayerPrefsManager.setGameLoaded (0);
-			pauseGameWithoutPauseMenu ();
+			pauseGameWithoutPauseMenu (PAUSE_GAME.UNPAUSE);
 			loadScene ("start");
 		}
 	}
@@ -141,7 +147,6 @@ public class LevelManager : MonoBehaviour
 	public void cleanSceneAfterDeath ()
 	{
         StartCoroutine(waitForRessurect());
-       // paused = true;
 		Bonus[] bonusesToDestroy = GameObject.FindObjectsOfType<Bonus> ();
 		TimeBonus[] timeBonusesToDestroy = GameObject.FindObjectsOfType<TimeBonus> ();
 		Missle[] misslesToDestroy = GameObject.FindObjectsOfType<Missle> ();
@@ -156,8 +161,7 @@ public class LevelManager : MonoBehaviour
 		}
         FindObjectOfType<Paddle>().resetPaddle();
         FindObjectOfType<Ball>().resetBall();
-       // paused = false;
-	}
+    }
 
 	public void addLive ()
 	{
@@ -182,12 +186,9 @@ public class LevelManager : MonoBehaviour
 
 	public void loadNextLevel ()
 	{
-		Debug.Log ("loadNEXTLevel start");
 		Ball.resetBallCounter ();
 		Brick.bricksCounter = 0;
 		if (SceneManager.GetActiveScene ().buildIndex + 1 < SceneManager.sceneCountInBuildSettings) {
-			Debug.Log ("loadNEXTLevel IF current index" + SceneManager.GetActiveScene ().buildIndex);
-			Debug.Log ("loadNEXTLevel IF count scenes" + SceneManager.sceneCountInBuildSettings);
 			PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
 			SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);			
 		} else {
@@ -283,12 +284,12 @@ public class LevelManager : MonoBehaviour
 		}
 	}
 
-	public void pauseGameWithoutPauseMenu ()
+    public void pauseGameWithoutPauseMenu(PAUSE_GAME state)
 	{
-		if (paused) {
+	    if (state == PAUSE_GAME.UNPAUSE) {
 			Time.timeScale = 1;
 			paused = false;
-		} else {
+		} else if(state == PAUSE_GAME.PAUSE){
 			paused = true;
 			Time.timeScale = 0; 
 		}
@@ -349,20 +350,7 @@ public class LevelManager : MonoBehaviour
                 newBrick = Instantiate(explodingBrick, new Vector3(brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
                 break;
         }
-        /*
-		if (brick.tag == "invisible") {
-			newBrick = Instantiate (invisibleBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-		} else if (brick.tag == "breakable") {
-			if (brick.maxHit == 3) {
-				newBrick = Instantiate (threeHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-			} else if (brick.maxHit == 2) {
-				newBrick = Instantiate (twoHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-			} else {
-				newBrick = Instantiate (oneHitBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-			}
-		} else {
-			newBrick = Instantiate (indestructibleBrick, new Vector3 (brick.PositionX, brick.PositionY, 0f), Quaternion.identity) as Brick;
-		}*/
+
 		newBrick.setMaxHits (brick.maxHit);
 		for (int i = 0; i < brick.timesHit; ++i) {
 			Debug.LogError ("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives ());

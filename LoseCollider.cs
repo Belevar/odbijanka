@@ -14,7 +14,6 @@ public class LoseCollider : MonoBehaviour
 	{
 		if (trigger.gameObject.tag == "ball") {
 			if (Ball.getBallCounter () > 1) {
-				print ("Wiekszy");
 				trigger.gameObject.GetComponent<Ball> ().destroyBall ();
 			} else {
 				levelManager.loseLiveAndCheckEndGame ();

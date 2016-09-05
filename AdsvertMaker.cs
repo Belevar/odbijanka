@@ -57,7 +57,7 @@ public class AdsvertMaker : MonoBehaviour
             levelManger.checkEndGame();
         break;   
 		}
-		levelManger.pauseGameWithoutPauseMenu ();
+		levelManger.pauseGameWithoutPauseMenu (LevelManager.PAUSE_GAME.UNPAUSE);
 	}
 
 	public bool isShowing ()

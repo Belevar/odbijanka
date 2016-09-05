@@ -149,7 +149,6 @@ public class Brick : MonoBehaviour
 
 	public void handleHits ()
 	{
-		//AudioSource.PlayClipAtPoint (hitSound, transform.position, FindObjectOfType<MusicPlayer> ().getVolume ());
 		timesHit++;
 		if (timesHit == 1 && isInvisible) {
 			setVisible ();
@@ -281,15 +280,7 @@ public class Brick : MonoBehaviour
 
     public AudioClip getHitSound()
     {
-		if(isBreakable)
-		{
-			Debug.Log("Normal sound");
-			return hitSound;// : indestructibleHitSound;
-		} else
-		{
-			Debug.Log("Indestruddasdasdsa");
-			return indestructibleHitSound;
-		}
+        return (isBreakable == true) ? hitSound : indestructibleHitSound;
     }
 
 	void OnDestroy ()

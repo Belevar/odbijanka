@@ -11,15 +11,9 @@ public class BonusManager : MonoBehaviour
 	public Slider slider;
 
     public Vector3 sizeOfBonusSprite;
-    private LevelManager levelManger;
 
 	Dictionary<TimeBonus, Slider> timeBonuses = new Dictionary<TimeBonus, Slider> ();
     List<Slider> releasedBonuses = new List<Slider>();
-
-    void Start()
-    {
-        levelManger = FindObjectOfType<LevelManager>();
-    }
 
 	IEnumerator bonusTimeCount (TimeBonus currentBonus, Slider slider)
 	{
@@ -131,12 +125,8 @@ public class BonusManager : MonoBehaviour
 		foreach (Slider slider in buffer) {
             Destroy(slider.gameObject);
 		}
-        Debug.Log("RESET BONUSES");
-       // var releasedBonusSliders = GetComponentsInChildren<Slider>(GameObject.Find("Buttons_and_bonuses").transform);
-       // Debug.Log(releasedBonusSliders.Length);
         foreach (Slider slider in releasedBonuses)
         {
-            Debug.Log("RESET BONUSES for");
             Destroy(slider.gameObject);
         }
         releasedBonuses.Clear();

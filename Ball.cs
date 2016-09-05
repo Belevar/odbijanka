@@ -12,7 +12,6 @@ public class Ball : MonoBehaviour
 	static private int ballCounter = 0;
 	static private bool isGlued = true;
 	static private bool isSuperBall = false;
-	static private int damage = 1;
 	static private int acctualSpeedChange = 0;
 	static private Vector3 originalPosition = new Vector3 ();
 	static public bool wallsArePresent = true;
@@ -24,9 +23,8 @@ public class Ball : MonoBehaviour
 	public enum BALL_MODE
 	{
 		NORMAL,
-		SUPER}
-
-	;
+		SUPER
+    };
 
 	// Use this for initialization
 	void Start ()
@@ -215,7 +213,6 @@ public class Ball : MonoBehaviour
 
 	void checkIfLeftPlayspace ()
 	{
-		Debug.Log ("Player left space - value=" + wallsArePresent);
 		if (transform.position.x < 0.2f) {
 			transform.position = new Vector3 (15.5f, transform.position.y);
 		} else if (transform.position.x > 16.2f) {
