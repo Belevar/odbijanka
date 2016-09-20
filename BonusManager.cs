@@ -21,6 +21,7 @@ public class BonusManager : MonoBehaviour
 			Debug.Log ("Panie ni ma slajdera");
 		}
 		float bonusDuration = currentBonus.getDuration ();
+        Vector3 orginalPos = slider.transform.position;
 
 		while (slider.value < bonusDuration) {
             slider.value =  (Mathf.MoveTowards(slider.value, bonusDuration, 1f * Time.deltaTime));
@@ -30,7 +31,7 @@ public class BonusManager : MonoBehaviour
 		currentBonus.disactivate ();
         timeBonuses.Remove(currentBonus);
         releasedBonuses.Add(slider);
-        slider.transform.SetParent(GameObject.Find("Buttons_and_bonuses").transform);
+       // slider.transform.SetParent(GameObject.Find("Buttons_and_bonuses").transform);
 		Vector2 pos = slider.transform.position;
 		pos.y += 75f;
 
@@ -38,32 +39,15 @@ public class BonusManager : MonoBehaviour
             slider.transform.position = new Vector3(slider.transform.position.x, Mathf.MoveTowards( slider.transform.position.y, pos.y, 50f * Time.deltaTime), slider.transform.position.z);
 			yield return null;
 		}
-        
-		Destroy (slider.gameObject);
-        releasedBonuses.Remove(slider);
-		//moveBonus(); //NOT WORKING AS EXPEXTED
-	}
 
-	public void moveBonus ()
-	{
-		//SHOULD CHECK IF newPos is on THE LEFT SIDE 
-		//Transform newPos = NextFreePosition();
-		var currentBonuses = new List<Slider> (timeBonuses.Values);
-		foreach (Slider bonus in currentBonuses) {
-			Transform newPos = NextFreePosition ();
-			//set Parent to Bonus Manager ?? 
-			bonus.transform.SetParent (this.transform);
-			Debug.Log ("NEXT FREE:" + newPos.transform.localPosition);
-			Debug.Log ("Current POS:" + bonus.transform.localPosition);
-			if (newPos.transform.localPosition.x < bonus.transform.localPosition.x) {
-				Debug.Log ("Current POS in IF:" + bonus.transform.localPosition);
-				bonus.transform.SetParent (newPos);
-				Debug.Log ("Current POS: in IF 2" + bonus.transform.localPosition);
-				while (Vector3.Distance (bonus.transform.localPosition, newPos.transform.localPosition) > 0.05f) {
-					bonus.transform.localPosition = Vector3.Lerp (bonus.transform.localPosition, newPos.transform.localPosition, 3f * Time.deltaTime);
-				}
-			}
-		}
+        slider.transform.position = orginalPos;
+        slider.GetComponentInChildren<Image>().sprite = null;
+        slider.GetComponentInChildren<Image>().color = Color.white;
+        //slider.GetComponent<SpriteRenderer>().color = Color.white;
+        slider.value = 0.0f;
+        
+		//Destroy (slider.gameObject);
+        releasedBonuses.Remove(slider);
 	}
 
 	public void disactivateAllBonuses ()
@@ -91,29 +75,41 @@ public class BonusManager : MonoBehaviour
 
 	public Slider spawn (TimeBonus newBonus)
 	{
-		Transform freePosition = NextFreePosition ();
-		if (freePosition) {
-			Slider enemy = Instantiate (slider, freePosition.position, Quaternion.identity) as Slider;
-			Image background = enemy.GetComponentInChildren<Image> ();
+		Slider freeSlider = NextFreePosition ();
+        if (freeSlider)
+        {
+			//Slider enemy = Instantiate (slider, freePosition.position, Quaternion.identity) as Slider;
+            Image background = freeSlider.GetComponentInChildren<Image>();
 			background.sprite = newBonus.GetComponent<SpriteRenderer> ().sprite;
-			background.SetNativeSize();
+            background.color = Color.black;
+			//background.SetNativeSize();
             
-			background.transform.localScale = new Vector3(0.45f,0.45f,1f);
-            background.rectTransform.sizeDelta = sizeOfBonusSprite;
-			if (enemy == null) {
+			//background.transform.localScale = new Vector3(0.45f,0.45f,1f);
+            //background.rectTransform.sizeDelta = sizeOfBonusSprite;
+            if (freeSlider == null)
+            {
 				Debug.Log ("Nie stworzyłem go :<");
 			}
-			enemy.transform.SetParent (freePosition);
-			return enemy;
+            //freeSlider.transform.SetParent(freePosition);
+            return freeSlider;
 		}
 		return null;
 	}
 
-	Transform NextFreePosition ()
+	Slider NextFreePosition ()
 	{
 		foreach (Transform childPositionGameObject in transform) {
-			if (childPositionGameObject.childCount == 0) {
-				return childPositionGameObject;
+			if (childPositionGameObject.gameObject.GetComponent<Slider>()) { // not working as expected tu treeba wszystko przerobić : <
+                if(childPositionGameObject.gameObject.GetComponent<Slider>().GetComponentInChildren<Image>().sprite == null) // działa teraz przypisac to do slidera , ta funkcja musi slider zwracać i gitara
+                {
+                    Debug.Log("Bla bla bla ");
+                    return childPositionGameObject.gameObject.GetComponent<Slider>();
+                }
+                else
+                {
+                    Debug.Log("NIE MA ");
+                }
+				
 			}
 		}
 		return null;
@@ -123,11 +119,26 @@ public class BonusManager : MonoBehaviour
 	{
 		var buffer = new List<Slider> (timeBonuses.Values);
 		foreach (Slider slider in buffer) {
-            Destroy(slider.gameObject);
+            Vector2 pos = slider.transform.localPosition;
+           // slider.transform.
+           // Debug.Log("Sliders local" + pos);
+            Debug.Log("Sliders normal" + slider.transform.position);
+            pos.y = -42.1f;
+            slider.transform.localPosition = pos;
+            slider.GetComponentInChildren<Image>().sprite = null;
+            slider.GetComponentInChildren<Image>().color = Color.white;
+            slider.value = 0.0f;
 		}
         foreach (Slider slider in releasedBonuses)
         {
-            Destroy(slider.gameObject);
+            Vector2 pos = slider.transform.localPosition;
+
+            Debug.Log("Sliders released" + pos);
+            pos.y = -42.1f;
+            slider.transform.localPosition = pos;
+            slider.GetComponentInChildren<Image>().sprite = null;
+            slider.GetComponentInChildren<Image>().color = Color.white;
+            slider.value = 0.0f;
         }
         releasedBonuses.Clear();
         timeBonuses.Clear();

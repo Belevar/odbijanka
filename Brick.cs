@@ -35,6 +35,9 @@ public class Brick : MonoBehaviour
 	float xMin;
 	float xMax;
 
+
+    public GameObject explosionAnimation;
+
     public enum BRICK_TYPE
     {
         INVISIBLE,
@@ -110,13 +113,21 @@ public class Brick : MonoBehaviour
 
 	void OnTriggerEnter2D (Collider2D trigger)
 	{
+        Debug.Log("Trigger = " + trigger.name);
 		if (trigger.gameObject.tag == "ball") {
 			Ball ball = trigger.gameObject.GetComponent<Ball>();
 			if (isBreakable) {
 				ball.playSuperBallSound();
 				destroyBrick ();
 			}
-		} 
+		} else if(trigger.gameObject.tag == "missle")
+        {
+            if(isBreakable)
+            {
+                destroyBrick();
+                Destroy(trigger.gameObject);
+            }
+        }
 	}
 
 	public void setVisible ()
@@ -221,7 +232,16 @@ public class Brick : MonoBehaviour
         bricksCounter--;
         float explosionRadius = 1;
         exploded = true;
-        Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+        if (explosionAnimation)
+        {
+            Instantiate(explosionAnimation, transform.position, transform.rotation);
+        }
+        else
+        {
+            Debug.Log("No animation for explosion!");
+        }
+            
+            Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         AudioSource.PlayClipAtPoint(getHitSound(), transform.position, FindObjectOfType<MusicPlayer>().getVolume()); // something is wrong here
         foreach (Collider2D col in objectsInRange)
         {

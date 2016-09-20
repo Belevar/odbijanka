@@ -22,6 +22,7 @@ public class LevelManager : MonoBehaviour
 	public SpriteRenderer livesSprite;
 	private AdsvertMaker adds;
 	public GameObject loseMesseage;
+    public GameObject bricksGraphic;
     public AudioClip loseSound;
 
 
@@ -40,6 +41,7 @@ public class LevelManager : MonoBehaviour
     public Brick builderBrick;
     public Brick explodingBrick;
 
+    public Transform bricksHolder;
 
 	[Serializable]
 	public struct Bonuses
@@ -62,6 +64,7 @@ public class LevelManager : MonoBehaviour
 		Debug.Log (PlayerPrefsManager.isGameLoaded ());
 		if (SceneManager.GetActiveScene ().name == "start" && PlayerPrefsManager.isGameLoaded () == 0) {
 			GameObject.Find ("resume game").GetComponent<Button> ().interactable = false;
+            GameObject.Find("resume game").GetComponent<Text>().color = new Color(255f,255f,255f,0.2f);
 		}
 	}
 
@@ -124,6 +127,7 @@ public class LevelManager : MonoBehaviour
 	void showLoseMessage ()
 	{
 		loseMesseage.SetActive (true);
+        bricksGraphic.SetActive(false);
 		pauseGameWithoutPauseMenu (PAUSE_GAME.PAUSE);
 	}
 
@@ -132,6 +136,7 @@ public class LevelManager : MonoBehaviour
 		Debug.Log ("Przed reklamą");
 		adds.ShowRewardedAd ();
 		loseMesseage.SetActive (false);
+        bricksGraphic.SetActive(true);
 		Debug.Log ("PO reklamie");
 	}
 
@@ -356,6 +361,7 @@ public class LevelManager : MonoBehaviour
 			Debug.LogError ("INSIDE i = " + i + " NewBrick " + newBrick + "==" + newBrick.getLives ());
 			newBrick.handleHits ();
 		}
+        newBrick.transform.SetParent(bricksHolder);
 		newBrick.setTimesHit (brick.timesHit);
 
 	}
