@@ -193,7 +193,8 @@ public class Brick : MonoBehaviour
 					Debug.Log ("Pozycja: " + spawnPos + ":FOUND object - ignore this spawn point");
 				} else {
 					Debug.Log ("Pozycja: " + spawnPos + ":CREATE");
-					Instantiate (gameObject, spawnPos, Quaternion.identity);
+					GameObject newBrick = Instantiate (gameObject, spawnPos, Quaternion.identity) as GameObject;
+                    newBrick.transform.SetParent(GameObject.Find("Bricks").transform);
 				}	
 			}
 		}
