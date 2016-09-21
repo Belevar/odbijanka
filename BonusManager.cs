@@ -12,42 +12,52 @@ public class BonusManager : MonoBehaviour
 
     public Vector3 sizeOfBonusSprite;
 
-	Dictionary<TimeBonus, Slider> timeBonuses = new Dictionary<TimeBonus, Slider> ();
-    List<Slider> releasedBonuses = new List<Slider>();
+    public struct BonusSlider
+    {
+        public Slider slider;
+        public Vector3 orginalPosition;
 
-	IEnumerator bonusTimeCount (TimeBonus currentBonus, Slider slider)
+        public BonusSlider(Slider slider, Vector3 position)
+        {
+            this.slider = slider;
+            orginalPosition = position;
+        }
+
+    }
+
+    Dictionary<TimeBonus, BonusSlider> timeBonuses = new Dictionary<TimeBonus, BonusSlider>();
+    List<BonusSlider> releasedBonuses = new List<BonusSlider>();
+
+    IEnumerator bonusTimeCount(TimeBonus currentBonus, BonusSlider bonusSlider)
 	{
-		if (slider == null) {
+		if (bonusSlider.slider == null) {
 			Debug.Log ("Panie ni ma slajdera");
 		}
 		float bonusDuration = currentBonus.getDuration ();
-        Vector3 orginalPos = slider.transform.position;
+        Vector3 orginalPos = bonusSlider.slider.transform.position;
 
-		while (slider.value < bonusDuration) {
-            slider.value =  (Mathf.MoveTowards(slider.value, bonusDuration, 1f * Time.deltaTime));
+		while (bonusSlider.slider.value < bonusDuration) {
+            bonusSlider.slider.value =  (Mathf.MoveTowards(bonusSlider.slider.value, bonusDuration, 1f * Time.deltaTime));
 			yield return null;
 		}
 
 		currentBonus.disactivate ();
         timeBonuses.Remove(currentBonus);
-        releasedBonuses.Add(slider);
-       // slider.transform.SetParent(GameObject.Find("Buttons_and_bonuses").transform);
-		Vector2 pos = slider.transform.position;
+        releasedBonuses.Add(bonusSlider);
+		Vector2 pos = bonusSlider.slider.transform.position;
 		pos.y += 75f;
 
-		while (Vector3.Distance (slider.transform.position, pos) > 0.5f) {
-            slider.transform.position = new Vector3(slider.transform.position.x, Mathf.MoveTowards( slider.transform.position.y, pos.y, 50f * Time.deltaTime), slider.transform.position.z);
+		while (Vector3.Distance (bonusSlider.slider.transform.position, pos) > 0.5f) {
+            bonusSlider.slider.transform.position = new Vector3(bonusSlider.slider.transform.position.x, Mathf.MoveTowards( bonusSlider.slider.transform.position.y, pos.y, 50f * Time.deltaTime), bonusSlider.slider.transform.position.z);
 			yield return null;
 		}
 
-        slider.transform.position = orginalPos;
-        slider.GetComponentInChildren<Image>().sprite = null;
-        slider.GetComponentInChildren<Image>().color = Color.white;
-        //slider.GetComponent<SpriteRenderer>().color = Color.white;
-        slider.value = 0.0f;
+        bonusSlider.slider.transform.position = orginalPos;
+        bonusSlider.slider.GetComponentInChildren<Image>().sprite = null;
+        bonusSlider.slider.GetComponentInChildren<Image>().color = Color.white;
+        bonusSlider.slider.value = 0.0f;
         
-		//Destroy (slider.gameObject);
-        releasedBonuses.Remove(slider);
+        releasedBonuses.Remove(bonusSlider);
 	}
 
 	public void disactivateAllBonuses ()
@@ -65,7 +75,7 @@ public class BonusManager : MonoBehaviour
 
         if(timeBonuses.ContainsKey(newBonus))
         {
-            timeBonuses[newBonus].value = 0f;
+            timeBonuses[newBonus].slider.value = 0f;
         }
 		else {
 			timeBonuses.Add (newBonus, spawn (newBonus));
@@ -73,27 +83,22 @@ public class BonusManager : MonoBehaviour
         }
 	}
 
-	public Slider spawn (TimeBonus newBonus)
+	public BonusSlider spawn (TimeBonus newBonus)
 	{
 		Slider freeSlider = NextFreePosition ();
         if (freeSlider)
         {
-			//Slider enemy = Instantiate (slider, freePosition.position, Quaternion.identity) as Slider;
             Image background = freeSlider.GetComponentInChildren<Image>();
 			background.sprite = newBonus.GetComponent<SpriteRenderer> ().sprite;
             background.color = Color.black;
-			//background.SetNativeSize();
             
-			//background.transform.localScale = new Vector3(0.45f,0.45f,1f);
-            //background.rectTransform.sizeDelta = sizeOfBonusSprite;
             if (freeSlider == null)
             {
 				Debug.Log ("Nie stworzyłem go :<");
 			}
-            //freeSlider.transform.SetParent(freePosition);
-            return freeSlider;
+            return new BonusSlider(freeSlider, freeSlider.transform.position);
 		}
-		return null;
+        return new BonusSlider(); // do something with that
 	}
 
 	Slider NextFreePosition ()
@@ -117,28 +122,20 @@ public class BonusManager : MonoBehaviour
 
 	public void resetAllBonuses ()
 	{
-		var buffer = new List<Slider> (timeBonuses.Values);
-		foreach (Slider slider in buffer) {
-            Vector2 pos = slider.transform.localPosition;
-           // slider.transform.
-           // Debug.Log("Sliders local" + pos);
-            Debug.Log("Sliders normal" + slider.transform.position);
-            pos.y = -42.1f;
-            slider.transform.localPosition = pos;
-            slider.GetComponentInChildren<Image>().sprite = null;
-            slider.GetComponentInChildren<Image>().color = Color.white;
-            slider.value = 0.0f;
-		}
-        foreach (Slider slider in releasedBonuses)
+        var buffer = new List<BonusSlider>(timeBonuses.Values);
+        foreach (BonusSlider bonusSlider in buffer)
         {
-            Vector2 pos = slider.transform.localPosition;
-
-            Debug.Log("Sliders released" + pos);
-            pos.y = -42.1f;
-            slider.transform.localPosition = pos;
-            slider.GetComponentInChildren<Image>().sprite = null;
-            slider.GetComponentInChildren<Image>().color = Color.white;
-            slider.value = 0.0f;
+            bonusSlider.slider.transform.position = bonusSlider.orginalPosition;
+            bonusSlider.slider.GetComponentInChildren<Image>().sprite = null;
+            bonusSlider.slider.GetComponentInChildren<Image>().color = Color.white;
+            bonusSlider.slider.value = 0.0f;
+		}
+        foreach (BonusSlider bonusSlider in releasedBonuses)
+        {
+            bonusSlider.slider.transform.position = bonusSlider.orginalPosition;
+            bonusSlider.slider.GetComponentInChildren<Image>().sprite = null;
+            bonusSlider.slider.GetComponentInChildren<Image>().color = Color.white;
+            bonusSlider.slider.value = 0.0f;
         }
         releasedBonuses.Clear();
         timeBonuses.Clear();

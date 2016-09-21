@@ -124,7 +124,7 @@ public class Brick : MonoBehaviour
         {
             if(isBreakable)
             {
-                destroyBrick();
+                handleHits();
                 Destroy(trigger.gameObject);
             }
         }
