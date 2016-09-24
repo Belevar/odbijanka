@@ -20,6 +20,8 @@ public class Ball : MonoBehaviour
 	public Sprite[] sprites;
 	static public Vector2 currentSpeed = new Vector2 (2f, 13f);
 
+    public Vector2 currentVelocity;
+
 	public enum BALL_MODE
 	{
 		NORMAL,
@@ -54,7 +56,12 @@ public class Ball : MonoBehaviour
 		} else if (!wallsArePresent) {
 			checkIfLeftPlayspace ();
 		}
-	}
+        //for test purpose only
+        currentVelocity = GetComponent<Rigidbody2D>().velocity;
+        GetComponent<Rigidbody2D>().velocity = currentVelocity;
+    
+         
+        }
 
 	int moveBallWithPaddle ()
 	{
@@ -82,6 +89,8 @@ public class Ball : MonoBehaviour
 
 	void OnCollisionEnter2D (Collision2D collision)
 	{
+        checkIfBallStuck(collision.transform.position);
+        Debug.Log("Kolizja " + transform.position);
 		if (collision.collider.tag == "paddle") {
 			if (isGlued) {
 				stickToThePaddle ();
@@ -146,7 +155,6 @@ public class Ball : MonoBehaviour
 	{
 		ballCounter = 0;
 	}
-
 
 	public void changeBallMode (BALL_MODE mode)
 	{
@@ -219,5 +227,61 @@ public class Ball : MonoBehaviour
 			transform.position = new Vector3 (0.5f, transform.position.y);
 		}
 	}
+
+   /* float[] xLastCollisionPoints = { 0f, 0f };
+    float[] yLastCollisionPoints = { 0f, 0f };
+    int xStuckCounter = 0;
+    int yStuckCounter = 0;
+    */
+
+    Vector3[] lastCollisionPoints = new Vector3[10];// = {Vector3.zero, Vector3.zero};
+    int stuckCounter = 0;
+    int arrayPlacement = 0;
+
+    //Prototype is working. Now I have to adjust number of collision point(rework to FOR instead of IF)
+    //Check why ball is stuck 2 times. It should be one.
+    void checkIfBallStuck(Vector3 collisionPoint)
+    {
+        /*if (collisionPoint == lastCollisionPoints[0] || collisionPoint == lastCollisionPoints[1])
+        {
+            Debug.Log("Same collision point!");
+            ++stuckCounter;
+        }*/
+        bool resetStuckCounter = true;
+        for(int i = 0; i < lastCollisionPoints.Length; ++i)
+        {
+            if(collisionPoint == lastCollisionPoints[i])
+            {
+                Debug.Log("Same collision point!");
+                ++stuckCounter;
+                resetStuckCounter = false;
+                break;
+            }
+        }
+        if(resetStuckCounter)
+        {
+            Debug.Log("Reset stuck counter");
+            stuckCounter = 0;
+            arrayPlacement = ++arrayPlacement % 10;
+            Debug.Log("Array placement number is " + arrayPlacement);
+            lastCollisionPoints[arrayPlacement] = collisionPoint;
+
+            //wpisz do jednej lub drugiej
+        }
+
+        if (stuckCounter > 10)
+        {
+            Debug.Log("Ball stuck!!!");
+
+            Vector2 speed = GetComponent<Rigidbody2D>().velocity;
+            speed.x += 0.1f;
+            speed.y -= 0.1f;
+            stuckCounter = 0;
+            GetComponent<Rigidbody2D>().velocity = speed;
+            //releaseBallInX
+        }
+    }
+
+
     
 }
