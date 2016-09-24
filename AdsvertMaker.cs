@@ -14,24 +14,18 @@ public class AdsvertMaker : MonoBehaviour
         StartCoroutine(checkInternetConnection());
 	}
 
-    void Update()
-    {
-        //Advertisement.IsReady("rewardedVideoZone");
-    }
-
 	public void ShowRewardedAd ()
 	{
         if (Advertisement.IsReady("rewardedVideo"))
-            {
-                var options = new ShowOptions { resultCallback = HandleShowResult };
-                Advertisement.Show("rewardedVideo", options);
+        {
+            var options = new ShowOptions { resultCallback = HandleShowResult };
+            Advertisement.Show("rewardedVideo", options);
 
-            }
-            else
-            {
-                levelManger.checkEndGame();
-            }
-
+        }
+        else
+        {
+            levelManger.checkEndGame();
+        }
 	}
 
 	private void HandleShowResult (ShowResult result)
@@ -66,6 +60,11 @@ public class AdsvertMaker : MonoBehaviour
 
     private bool unityAdsInitialized = false;//can be used for informing the user about the status
 
+    public bool areAddsInitialized()
+    {
+        return unityAdsInitialized;
+    }
+
     public IEnumerator checkInternetConnection()
     {
         float timeCheck = 1.0f;//will check google.com every two seconds
@@ -89,7 +88,8 @@ public class AdsvertMaker : MonoBehaviour
             }
             t2 = Time.fixedTime - t1;
             if (t2 < timeCheck)
-                yield return new WaitForSeconds(timeCheck - t2);
+               // yield return new WaitForSeconds(timeCheck - t2); 
+                yield return new WaitForSecondsRealtime(timeCheck - t2); // it can be good
         }
     }
 

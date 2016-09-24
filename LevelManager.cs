@@ -113,7 +113,7 @@ public class LevelManager : MonoBehaviour
 		PlayerPrefsManager.setHealthPoints (lives);
 		FindObjectOfType<BonusManager> ().disactivateAllBonuses ();
 		FindObjectOfType<BonusManager> ().resetAllBonuses ();
-		cleanSceneAfterDeath ();
+		cleanSceneAfterDeath (); //
 
 		if (zeroLives) {
 			livesSprite.enabled = false;
@@ -131,14 +131,36 @@ public class LevelManager : MonoBehaviour
 		pauseGameWithoutPauseMenu (PAUSE_GAME.PAUSE);
 	}
 
-	public void showAdd ()
-	{
-		Debug.Log ("Przed reklamą");
-		adds.ShowRewardedAd ();
-		loseMesseage.SetActive (false);
-        bricksGraphic.SetActive(true);
-		Debug.Log ("PO reklamie");
-	}
+    public GameObject noInternet;
+
+    public void showAdd()
+    {
+        Debug.Log("Przed reklamą");
+        if (adds.areAddsInitialized())
+        {
+            adds.ShowRewardedAd();
+            loseMesseage.SetActive(false);
+            bricksGraphic.SetActive(true);
+            Debug.Log("PO reklamie");
+        }
+        else
+        {
+           // GameObject.Find("No internet connection").GetComponent<Animator>().SetTrigger("No internet");
+            Animator animator = noInternet.GetComponent<Animator>();
+            if(animator == null)
+            {
+                Debug.Log("NIE MA ANIMATORA");
+            }else
+            {
+               // pauseGameWithoutPauseMenu(PAUSE_GAME.UNPAUSE);
+                Debug.Log("Jest Animator");
+                animator.Play("slow disappear");
+               // pauseGameWithoutPauseMenu(PAUSE_GAME.PAUSE);
+
+            }
+            Debug.LogError("NO INTERNET CONNECTION");
+        }
+    }
 
 	public void checkEndGame ()
 	{
