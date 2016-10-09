@@ -36,7 +36,7 @@ public class Brick : MonoBehaviour
 	float xMax;
 
 
-    public GameObject explosionAnimation;
+    public Animator explosionAnimation;
 
     public enum BRICK_TYPE
     {
@@ -67,6 +67,11 @@ public class Brick : MonoBehaviour
 			levelManager.updateBrickCounter ();
 		}
 		orginalSprite = GetComponent<SpriteRenderer> ().sprite;
+
+        if(isExploding)
+        {
+            GetComponent<Animator>().enabled = false;
+        }
 		maxHits = sprites.Length + 1;
 		if (isInvisible) {
 			gameObject.GetComponent<SpriteRenderer> ().enabled = false;
@@ -205,12 +210,28 @@ public class Brick : MonoBehaviour
 		return timesHit;
 	}
 
+    //HOT FIX
+    public void destroyBrickAfterExplosion()
+    {
+        Destroy(gameObject);
+    }
+
 	public void destroyBrick ()
 	{
         
         if (isExploding && !exploded)
         {
-            Destroy(gameObject);
+            Animator anim = GetComponent<Animator>();
+            anim.enabled = true;
+            if (anim)
+            {
+                anim.Play("explode", 0);
+            }
+            else
+            {
+                Debug.Log("Ni ma animacji");
+            }
+           // Destroy(gameObject);
             explode();
             checkForBonus();
             levelManager.brickDestroyed();
@@ -233,16 +254,19 @@ public class Brick : MonoBehaviour
         bricksCounter--;
         float explosionRadius = 1;
         exploded = true;
-        if (explosionAnimation)
-        {
-            Instantiate(explosionAnimation, transform.position, transform.rotation);
-        }
-        else
-        {
-            Debug.Log("No animation for explosion!");
-        }
+        //if (explosionAnimation)
+       // {
+            //Instantiate(explosionAnimation, transform.position, transform.rotation);
+            //explosionAnimation.Play("explode");
+ 
+            // }
+        //else
+       // {
+        //    Debug.Log("No animation for explosion!");
+        //}
             
             Collider2D[] objectsInRange = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+        
         AudioSource.PlayClipAtPoint(getHitSound(), transform.position, FindObjectOfType<MusicPlayer>().getVolume()); // something is wrong here
         foreach (Collider2D col in objectsInRange)
         {

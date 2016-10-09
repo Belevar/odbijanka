@@ -219,7 +219,7 @@ public class LevelManager : MonoBehaviour
 			PlayerPrefsManager.setLevel (PlayerPrefsManager.getLevel () + 1);
 			SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);			
 		} else {
-			SceneManager.LoadScene ("win");
+			SceneManager.LoadScene ("start");
 		}
 	}
 
